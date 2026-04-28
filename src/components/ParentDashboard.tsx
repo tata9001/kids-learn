@@ -12,6 +12,8 @@ export function ParentDashboard() {
   const [requiresConfirmation, setRequiresConfirmation] = useState(true);
   const todayTasks = Object.values(state.tasks).filter((task) => task.dateKey === state.todayKey);
   const review = state.reviews[state.todayKey];
+  const previousDateKeys = Object.keys(state.reviews).filter((key) => key !== state.todayKey).sort().reverse();
+  const latestPreviousDateKey = previousDateKeys[0];
 
   return (
     <section className="parentGrid">
@@ -109,6 +111,11 @@ export function ParentDashboard() {
 
       <section className="panel">
         <h2>数据</h2>
+        {latestPreviousDateKey && (
+          <button className="secondaryButton" onClick={() => actions.copyUnfinished(latestPreviousDateKey)}>
+            复制昨日未完成任务
+          </button>
+        )}
         <button className="secondaryButton" onClick={() => window.alert(exportStudyState())}>
           导出数据
         </button>

@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { copyUnfinishedTasksToToday, rolloverToDate } from "../domain/dayRollover";
 import { createDefaultState } from "../domain/defaultState";
 import { completeFocusSession, recordInterruption, startFocusSession } from "../domain/focus";
 import { refreshDailyReview } from "../domain/review";
@@ -16,6 +17,7 @@ interface StudyActions {
   markComplete(taskId: string): void;
   confirm(taskId: string): void;
   adjust(taskId: string): void;
+  copyUnfinished(fromDateKey: string): void;
   resetData(): void;
 }
 
@@ -27,7 +29,7 @@ interface StudyStore {
 const StudyContext = createContext<StudyStore | null>(null);
 
 export function StudyProvider({ children }: { children: React.ReactNode }) {
-  const [state, setState] = useState<StudyState>(() => loadStudyState());
+  const [state, setState] = useState<StudyState>(() => rolloverToDate(loadStudyState(), new Date()));
 
   useEffect(() => {
     saveStudyState(state);
@@ -64,6 +66,9 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
       },
       adjust(taskId) {
         setState((current) => requestTaskAdjustment(current, taskId));
+      },
+      copyUnfinished(fromDateKey) {
+        setState((current) => copyUnfinishedTasksToToday(current, fromDateKey));
       },
       resetData() {
         clearStudyState();
