@@ -1,0 +1,21 @@
+import { describe, expect, it } from "vitest";
+import { createDefaultState } from "./defaultState";
+import { todayKey } from "./date";
+
+describe("createDefaultState", () => {
+  it("creates tablet-first fake-login state with parent and child modes available", () => {
+    const state = createDefaultState(new Date("2026-04-28T08:00:00+08:00"));
+
+    expect(state.profile.childName).toBe("小朋友");
+    expect(state.mode).toBe("home");
+    expect(state.settings.focusMinutes).toBe(15);
+    expect(state.settings.restMinutes).toBe(5);
+    expect(state.settings.focusPresentation).toBe("quiet");
+    expect(state.todayKey).toBe("2026-04-28");
+    expect(state.reviews[state.todayKey].dateKey).toBe("2026-04-28");
+  });
+
+  it("uses stable date keys", () => {
+    expect(todayKey(new Date("2026-04-28T23:59:59+08:00"))).toBe("2026-04-28");
+  });
+});
