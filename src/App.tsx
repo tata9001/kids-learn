@@ -1,5 +1,6 @@
+import { ChildDashboard } from "./components/ChildDashboard";
+import { FocusView } from "./components/FocusView";
 import { Home } from "./components/Home";
-import { PetPanel } from "./components/PetPanel";
 import { useStudyStore } from "./state/useStudyStore";
 
 function Header({ title }: { title: string }) {
@@ -12,22 +13,30 @@ function Header({ title }: { title: string }) {
   );
 }
 
-function ChildPlaceholder() {
-  const { state } = useStudyStore();
-  return (
-    <main className="appShell">
-      <Header title="孩子模式" />
-      <PetPanel pet={state.pet} />
-      <h2>今日任务</h2>
-    </main>
-  );
-}
-
 function ParentPlaceholder() {
+  const { actions } = useStudyStore();
   return (
     <main className="appShell">
       <Header title="家长模式" />
       <h2>今日计划</h2>
+      <label>
+        任务名称
+        <input aria-label="任务名称" />
+      </label>
+      <button
+        onClick={() =>
+          actions.addTask({
+            name: "语文练习",
+            type: "homework",
+            subject: "chinese",
+            estimatedFocusBlocks: 1,
+            completionStandard: "完成并检查一遍",
+            requiresConfirmation: true
+          })
+        }
+      >
+        添加任务
+      </button>
     </main>
   );
 }
@@ -35,7 +44,22 @@ function ParentPlaceholder() {
 export function App() {
   const { state, actions } = useStudyStore();
 
-  if (state.mode === "child") return <ChildPlaceholder />;
+  if (state.mode === "focus") {
+    return (
+      <main className="appShell">
+        <FocusView />
+      </main>
+    );
+  }
+
+  if (state.mode === "child") {
+    return (
+      <main className="appShell">
+        <Header title="孩子模式" />
+        <ChildDashboard />
+      </main>
+    );
+  }
   if (state.mode === "parent") return <ParentPlaceholder />;
 
   return (
