@@ -1,240 +1,240 @@
-# Task Management, Recurrence, And Pet Upgrade Design
+# 任务管理、重复任务与宠物升级设计
 
-## Goal
+## 目标
 
-Improve the study companion so parents can manage tasks after creation, routine tasks can repeat automatically, children or parents can record completion details, and the pet reward experience feels clearer and more motivating.
+优化学习伙伴应用，让家长可以在创建任务后继续管理任务，让日常任务可以自动重复，让孩子或家长可以记录任务完成细节，并让宠物奖励体验更清晰、更有激励感。
 
-This work extends the existing local-first Vite React app. It keeps the current parent-child flow intact: parents prepare and review tasks, children execute tasks, and the app stores state in versioned local browser data.
+本设计基于现有的本地优先 Vite React 应用继续扩展。现有亲子流程保持不变：家长准备和复盘任务，孩子执行任务，应用使用带版本的本地浏览器数据保存状态。
 
-## Scope
+## 范围
 
-In scope:
+包含：
 
-- Edit and delete tasks that have not started.
-- Cancel or archive tasks that already have activity while preserving history.
-- Add text-only completion details from children and parent confirmation comments.
-- Support recurring tasks for today only, every day, or selected weekdays.
-- Automatically generate due recurring task instances when the app opens on a matching day.
-- Improve pet progression with XP, visible progress, recent reward messages, and next-unlock hints.
+- 修改和删除尚未开始的任务。
+- 对已经有活动记录的任务进行取消或归档，同时保留历史。
+- 支持孩子填写文字类完成细节，支持家长填写确认评语。
+- 支持只今天、每天、每周几天的任务设置。
+- 应用在匹配日期打开时，自动生成到期的重复任务实例。
+- 优化宠物成长体验，增加经验值、可见进度、最近奖励提示和下一解锁提示。
 
-Out of scope:
+不包含：
 
-- Photo upload or evidence attachments.
-- Monthly recurrence rules.
-- Calendar planner views.
-- Cloud sync or accounts.
-- Pet mini-games or complex pet-care actions.
+- 照片上传或证明附件。
+- 每月重复规则。
+- 日历式计划视图。
+- 云同步或真实账号。
+- 宠物小游戏或复杂的宠物照顾操作。
 
-## Product Behavior
+## 产品行为
 
-### Task Editing And Removal
+### 任务修改与移除
 
-Parents manage tasks from the existing parent dashboard instead of a separate planner page.
+家长仍然在现有家长面板中管理任务，不新增独立的计划页面。
 
-For tasks with status `not-started`, parents can:
+对于状态为 `not-started` 的任务，家长可以：
 
-- Edit task name.
-- Edit task type.
-- Edit estimated focus blocks.
-- Edit completion standard.
-- Edit whether parent confirmation is required.
-- Edit recurrence settings.
-- Delete the task from today's plan.
+- 修改任务名称。
+- 修改任务类型。
+- 修改预计专注块数量。
+- 修改完成标准。
+- 修改是否需要家长确认。
+- 修改重复设置。
+- 从今日计划中删除任务。
 
-For tasks that have already started, been marked complete, are waiting for confirmation, need adjustment, or are completed, parents cannot destructively delete the task. Instead, the app offers a softer `取消今日任务` or archive action.
+对于已经开始、已被孩子标记完成、等待确认、需要调整或已完成的任务，家长不能进行破坏性删除。应用提供更温和的 `取消今日任务` 或归档操作。
 
-Cancelled tasks should disappear from the child's active task list, but remain visible in parent history and review where needed. This protects focus-session history, completion records, and pet rewards from being silently rewritten.
+已取消的任务应从孩子的可执行任务列表中隐藏，但在必要时仍保留在家长历史和复盘中。这样可以避免专注记录、完成记录和宠物奖励被静默改写。
 
-### Completion Details
+### 完成细节
 
-When a child taps complete, the app opens a small completion detail step before changing task status.
+当孩子点击完成时，应用先打开一个轻量的完成细节步骤，再改变任务状态。
 
-Completion details include:
+完成细节包括：
 
-- Optional child note: what was completed or what felt difficult.
-- Optional difficulty choice: `没有`, `有一点`, or `需要家长看看`.
-- For reading tasks, actual reading minutes and optional book name.
+- 可选的孩子说明：完成了什么，或哪里觉得有点难。
+- 可选的困难程度选择：`没有`、`有一点` 或 `需要家长看看`。
+- 对阅读任务，记录实际阅读分钟数和可选书名。
 
-If a task requires parent confirmation, these details are visible in the parent confirmation area. The parent can add a short encouragement or review comment before confirming or asking for adjustment.
+如果任务需要家长确认，这些细节会显示在家长确认区。家长可以在确认或要求再调整前，添加一句简短鼓励或复盘评语。
 
-If a task does not require parent confirmation, completion details are saved directly with the completed task.
+如果任务不需要家长确认，完成细节会直接随已完成任务保存。
 
-No photo or file upload is included in this version.
+本版本不支持照片或文件上传。
 
-### Repeating Tasks
+### 重复任务
 
-A task can use one of three schedule settings:
+任务可以使用三种计划设置：
 
 - `只今天`
 - `每天`
 - `每周几天`
 
-For `每周几天`, parents choose one or more weekdays. This is the only custom recurrence rule in this version.
+对于 `每周几天`，家长可以选择一个或多个星期几。这是本版本唯一的自定义重复规则。
 
-Recurring tasks are stored as templates. A generated task for today is a normal task instance, so child focus, completion, parent confirmation, review, and rewards continue to use the same task workflow.
+重复任务以模板形式保存。为今天生成的任务是普通任务实例，因此孩子专注、完成、家长确认、复盘和奖励仍然沿用同一套任务流程。
 
-When the app opens or rolls over to a new day, it generates task instances for due recurring templates. Generation must be idempotent: refreshing the app or opening it multiple times on the same day must not create duplicates.
+当应用打开或跨天切换时，会为到期的重复任务模板生成当天任务实例。生成过程必须是幂等的：同一天刷新应用或多次打开应用不能产生重复任务。
 
-Editing a generated recurring task asks parents to choose between:
+修改一个由重复模板生成的任务时，应用询问家长选择：
 
-- Update only today's task.
-- Update the recurring template for future days.
+- 只修改今天的任务。
+- 修改重复模板，影响未来日期。
 
-Deleting a `not-started` generated task removes only today's task instance. Stopping future generation uses a separate `暂停重复任务` action on the template.
+删除 `not-started` 的生成任务只会移除今天的任务实例。停止未来生成使用模板上的独立 `暂停重复任务` 操作。
 
-### Pet Upgrade Experience
+### 宠物升级体验
 
-The pet upgrade system should feel more legible and rewarding without becoming a separate game.
+宠物成长系统要更容易理解、更有奖励感，但不变成另一个游戏。
 
-Pet state gains:
+宠物状态新增：
 
-- XP toward the next level.
-- XP required for the next level.
-- Recent reward message.
-- Next-unlock hint.
-- Clearer milestone decorations.
+- 升到下一级的经验值。
+- 升级所需经验值。
+- 最近奖励提示。
+- 下一解锁提示。
+- 更清晰的里程碑装饰。
 
-Reward behavior:
+奖励行为：
 
-- Completing a focus block gives energy and XP.
-- Completing a task gives a care item and XP.
-- Meeting the daily goal increases streak and gives a larger celebration.
-- Level-up happens when XP reaches the next threshold.
-- Streak milestones still unlock decorations.
+- 完成一个专注块获得能量和经验值。
+- 完成一个任务获得照顾道具和经验值。
+- 达成每日目标增加连续天数，并触发更明显的庆祝反馈。
+- 当经验值达到下一级门槛时升级。
+- 连续天数里程碑仍然解锁装饰。
 
-The pet panel shows:
+宠物面板显示：
 
-- Level.
-- Energy.
-- XP progress.
-- Streak days.
-- Care item count.
-- Recent reward message.
-- Next unlock hint.
+- 等级。
+- 能量。
+- 经验进度。
+- 连续天数。
+- 照顾道具数量。
+- 最近奖励提示。
+- 下一解锁提示。
 
-After a reward, the UI shows a lightweight celebration message near the pet. This should be calm and encouraging, not a distracting animation-heavy game layer.
+获得奖励后，界面在宠物附近显示轻量庆祝提示。反馈应保持温和鼓励，不引入容易分散注意力的重动画游戏层。
 
-## Architecture
+## 架构
 
-The implementation should preserve the current structure:
+实现应延续当前结构：
 
-- Domain modules own rules and state transitions.
-- React components stay thin and call typed store actions.
-- Local storage continues to persist the versioned state object.
+- 领域模块负责规则和状态转换。
+- React 组件保持轻量，只调用类型明确的 store actions。
+- 本地存储继续保存带版本的状态对象。
 
-Expected domain changes:
+预期领域层变化：
 
-- Extend `Task` with edit/cancel metadata and completion details.
-- Add `RecurringTaskTemplate` records to `StudyState`.
-- Add recurrence generation logic in a focused module such as `src/domain/recurrence.ts`.
-- Extend `src/domain/tasks.ts` with edit, delete, cancel, completion-detail, and parent-comment transitions.
-- Extend `src/domain/rewards.ts` with XP, level thresholds, recent reward, and next unlock calculations.
-- Update day rollover so recurring tasks generate before dashboards render.
+- 扩展 `Task`，增加修改/取消元数据和完成细节。
+- 在 `StudyState` 中增加 `RecurringTaskTemplate` 记录。
+- 新增一个聚焦的重复任务模块，例如 `src/domain/recurrence.ts`。
+- 扩展 `src/domain/tasks.ts`，加入修改、删除、取消、完成细节和家长评语相关转换。
+- 扩展 `src/domain/rewards.ts`，加入经验值、升级门槛、最近奖励和下一解锁计算。
+- 更新跨天逻辑，让重复任务在仪表盘渲染前完成生成。
 
-The design should avoid broad refactors unrelated to these behaviors. If `ParentDashboard` becomes too large while adding edit forms and recurrence controls, extract focused components such as task editor, recurrence controls, and confirmation details.
+设计应避免与这些行为无关的大范围重构。如果加入编辑表单和重复任务控件后 `ParentDashboard` 变得过大，可以抽取聚焦组件，例如任务编辑器、重复规则控件和确认细节区。
 
-## Data Model
+## 数据模型
 
-`Task` should support:
+`Task` 应支持：
 
-- Recurrence template link for generated tasks.
-- Cancelled or archived state.
-- Completion detail fields.
-- Parent confirmation comment.
-- Timestamps for edited, cancelled, and completed states where useful.
+- 生成任务对应的重复模板链接。
+- 取消或归档状态。
+- 完成细节字段。
+- 家长确认评语。
+- 必要时记录修改、取消和完成时间。
 
-`RecurringTaskTemplate` is used only for repeating tasks. It should include:
+`RecurringTaskTemplate` 只用于重复任务，应包含：
 
-- Template ID.
-- Base task fields: name, type, subject, estimated blocks, standard, confirmation requirement.
-- Recurrence kind: daily or selected weekdays.
-- Selected weekdays for weekly rules.
-- Active or paused status.
-- Generated instance tracking sufficient to prevent duplicates.
+- 模板 ID。
+- 基础任务字段：名称、类型、科目、预计专注块、完成标准、是否需要确认。
+- 重复类型：每天或每周几天。
+- 每周规则选择的星期几。
+- 启用或暂停状态。
+- 足够防止重复生成的实例跟踪信息。
 
-`PetState` should support:
+`PetState` 应支持：
 
-- Level.
-- Energy.
-- XP.
-- XP needed for next level.
-- Mood.
-- Care items.
-- Streak days.
-- Unlocked decorations.
-- Recent reward message.
-- Next unlock hint.
+- 等级。
+- 能量。
+- 经验值。
+- 升到下一级所需经验值。
+- 心情。
+- 照顾道具。
+- 连续天数。
+- 已解锁装饰。
+- 最近奖励提示。
+- 下一解锁提示。
 
-Storage may require a version bump and migration from the existing version 1 state. Existing users should keep current tasks, settings, review data, and pet data, with new fields filled by defaults.
+存储可能需要版本升级，并从现有 version 1 状态迁移。已有用户应保留当前任务、设置、复盘数据和宠物数据，新字段使用默认值补齐。
 
-## Error Handling And Edge Cases
+## 错误处理与边界情况
 
-Task management:
+任务管理：
 
-- Empty task names remain invalid.
-- Deleting a `not-started` task removes it from today's task list.
-- Cancelling a task with history does not remove focus sessions or completed review entries.
-- Child dashboards should hide cancelled or archived tasks from active work.
-- Parent dashboards should still make cancelled or archived tasks understandable.
+- 空任务名称仍然无效。
+- 删除 `not-started` 任务会将其从今日任务列表移除。
+- 取消已有历史的任务不会移除专注记录或已完成复盘记录。
+- 孩子面板应从可执行任务中隐藏已取消或已归档任务。
+- 家长面板应仍然能清楚展示已取消或已归档任务的含义。
 
-Completion details:
+完成细节：
 
-- Notes are optional and should not block completion.
-- Reading minutes should accept reasonable numeric values only.
-- Parent comments are optional.
+- 说明是可选的，不阻塞完成。
+- 阅读分钟数只接受合理的数字值。
+- 家长评语是可选的。
 
-Recurrence:
+重复任务：
 
-- Weekly recurrence must require at least one selected weekday.
-- Generated tasks must not duplicate on refresh.
-- Paused templates stop future generation but do not remove existing task history.
-- Editing only today's generated task must not mutate the template.
-- Editing the template affects future generated tasks, not already completed history.
+- 每周重复必须至少选择一个星期几。
+- 生成任务在刷新时不能重复创建。
+- 暂停模板会停止未来生成，但不删除已有任务历史。
+- 只修改今天的生成任务不能改变模板。
+- 修改模板只影响未来生成的任务，不改写已完成历史。
 
-Pet rewards:
+宠物奖励：
 
-- Rewards must not be granted twice for the same task completion or parent confirmation.
-- XP overflow should carry into the next level.
-- Recent reward messages should update on meaningful reward events.
+- 同一个任务完成或家长确认不能重复发放奖励。
+- 经验值溢出应结转到下一级。
+- 最近奖励提示应在有意义的奖励事件后更新。
 
-## Testing Strategy
+## 测试策略
 
-Unit tests should cover:
+单元测试应覆盖：
 
-- Editing and deleting `not-started` tasks.
-- Cancelling tasks with existing activity.
-- Completion details for normal and reading tasks.
-- Parent confirmation comments.
-- Daily recurrence generation.
-- Selected-weekday recurrence generation.
-- Duplicate prevention during app refresh or repeated rollover.
-- Pausing recurring templates.
-- Pet XP, level-up, recent reward messages, and next-unlock hints.
+- 修改和删除 `not-started` 任务。
+- 取消已有活动记录的任务。
+- 普通任务和阅读任务的完成细节。
+- 家长确认评语。
+- 每天重复任务生成。
+- 每周选定星期几的重复任务生成。
+- 应用刷新或重复跨天时的重复生成防护。
+- 暂停重复任务模板。
+- 宠物经验值、升级、最近奖励提示和下一解锁提示。
 
-Integration tests should cover:
+集成测试应覆盖：
 
-- Parent creates, edits, and deletes a `not-started` task.
-- Child completes a task with completion details.
-- Parent reviews details and confirms with a comment.
-- A selected-weekday recurring task appears automatically on a matching day.
-- Pet panel updates after focus and task rewards.
+- 家长创建、修改并删除一个 `not-started` 任务。
+- 孩子填写完成细节并完成任务。
+- 家长查看完成细节，并带评语确认任务。
+- 每周选定星期几的重复任务在匹配日期自动出现。
+- 专注和任务奖励后，宠物面板正确更新。
 
-Browser/tablet smoke testing should cover:
+浏览器/平板冒烟测试应覆盖：
 
-- Parent task management controls remain usable on tablet widths.
-- Child completion detail step is readable and low-friction.
-- Pet progress and reward messages do not crowd the focus screen or dashboard.
+- 家长任务管理控件在平板宽度下仍然易用。
+- 孩子的完成细节步骤可读、低摩擦。
+- 宠物进度和奖励提示不会挤压专注页面或仪表盘。
 
-## Acceptance Criteria
+## 验收标准
 
-This feature is complete when:
+本功能完成时应满足：
 
-- Parents can edit and delete tasks that have not started.
-- Parents can cancel active or historical tasks without deleting reward or review history.
-- Children can add text-only completion details.
-- Parents can read completion details and add a confirmation comment.
-- Parents can create daily and selected-weekday recurring tasks.
-- Due recurring tasks appear automatically once per day without duplication.
-- Parents can pause recurring templates.
-- Pet level progress, recent reward, and next unlock are visible and update after rewards.
-- Existing local data migrates without losing current task, review, settings, or pet state.
+- 家长可以修改和删除尚未开始的任务。
+- 家长可以取消活跃或历史任务，而不删除奖励或复盘历史。
+- 孩子可以添加纯文字完成细节。
+- 家长可以阅读完成细节，并添加确认评语。
+- 家长可以创建每天和每周几天的重复任务。
+- 到期的重复任务每天自动出现一次，不重复生成。
+- 家长可以暂停重复任务模板。
+- 宠物等级进度、最近奖励和下一解锁可见，并在奖励后更新。
+- 现有本地数据迁移后不丢失当前任务、复盘、设置或宠物状态。
