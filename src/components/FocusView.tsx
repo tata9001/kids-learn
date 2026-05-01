@@ -43,7 +43,7 @@ export function FocusView() {
       <div className="timerDisplay" aria-label="剩余时间">
         {formatSeconds(remaining)}
       </div>
-      {state.settings.focusPresentation === "lively" && <p className="encouragement">伙伴在旁边陪你，一次只做这一件事。</p>}
+      {state.settings.focusPresentation === "lively" && <p className="encouragement">小猫在旁边陪你，一次只做这一件事。</p>}
       <div className="focusActions">
         <button className="secondaryButton" onClick={() => setShowStuck(true)}>
           我卡住了

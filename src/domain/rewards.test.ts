@@ -20,7 +20,7 @@ describe("rewards", () => {
     expect(next.reviews["2026-04-28"].completedTaskIds).toContain(task.id);
   });
 
-  it("unlocks decorations at 3, 7, and 14 day streaks", () => {
+  it("unlocks kitten upgrades at 3, 7, and 14 day streaks", () => {
     const state = testState({
       pet: { ...testState().pet, streakDays: 2 }
     });
@@ -28,6 +28,6 @@ describe("rewards", () => {
     const next = updateDailyGoalReward(state, true);
 
     expect(next.pet.streakDays).toBe(3);
-    expect(next.pet.unlockedDecorations).toContain("star-collar");
+    expect(next.pet.unlockedDecorations).toContain("kitten-bell");
   });
 });

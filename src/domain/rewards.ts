@@ -1,9 +1,9 @@
 import type { StudyState } from "./types";
 
 const STREAK_UNLOCKS: Record<number, string> = {
-  3: "star-collar",
-  7: "rainbow-bed",
-  14: "golden-badge"
+  3: "kitten-bell",
+  7: "cloud-cat-bed",
+  14: "star-whisker-badge"
 };
 
 export function grantFocusReward(state: StudyState, minutes: number): StudyState {

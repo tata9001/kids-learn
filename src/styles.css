@@ -114,19 +114,175 @@ textarea {
   gap: 20px;
   padding: 20px;
   margin-bottom: 24px;
+  overflow: hidden;
 }
 
-.petAvatar {
-  display: grid;
+.catAvatar {
+  position: relative;
+  display: flex;
+  flex: 0 0 auto;
   width: 112px;
   height: 112px;
-  place-items: center;
-  border-radius: 50%;
-  background: #f8d77b;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid #263238;
+  border-radius: 48% 48% 44% 44%;
+  background: #f7c96f;
+  box-shadow: inset -12px -14px 0 rgba(255, 255, 255, 0.3);
 }
 
-.petFace {
-  font-size: 2rem;
+.catEar {
+  position: absolute;
+  top: -16px;
+  width: 34px;
+  height: 42px;
+  border: 3px solid #263238;
+  background: inherit;
+  transform: rotate(45deg);
+}
+
+.catEarLeft {
+  left: 15px;
+  border-radius: 8px 0 8px 0;
+}
+
+.catEarRight {
+  right: 15px;
+  border-radius: 8px 0 8px 0;
+}
+
+.catFace {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-top: 4px;
+}
+
+.catEye,
+.catNose {
+  display: block;
+  background: #263238;
+}
+
+.catEye {
+  width: 10px;
+  height: 14px;
+  border-radius: 50%;
+}
+
+.catNose {
+  width: 9px;
+  height: 7px;
+  border-radius: 50% 50% 70% 70%;
+}
+
+.catMouth {
+  position: absolute;
+  top: 58px;
+  left: 50%;
+  color: #263238;
+  font-size: 1.25rem;
+  font-weight: 800;
+  transform: translateX(-50%);
+}
+
+.catBadge {
+  position: absolute;
+  right: -6px;
+  bottom: -6px;
+  display: grid;
+  min-width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: #226b5f;
+  color: #fff;
+  font-weight: 900;
+}
+
+.catInfo {
+  display: grid;
+  gap: 8px;
+}
+
+.catInfo h2,
+.catInfo p {
+  margin: 0;
+}
+
+.catSkill {
+  color: #1f5b52;
+  font-weight: 800;
+}
+
+.catStats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.catStats span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: #e5f1ed;
+  color: #226b5f;
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.catNextGoal {
+  color: #6f5a20;
+  font-weight: 700;
+}
+
+.cat-bell .catAvatar::after,
+.cat-cloud .catAvatar::after,
+.cat-star .catAvatar::after {
+  position: absolute;
+  bottom: 7px;
+  left: 50%;
+  display: grid;
+  width: 26px;
+  height: 26px;
+  place-items: center;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #263238;
+  font-size: 0.9rem;
+  font-weight: 900;
+  transform: translateX(-50%);
+}
+
+.cat-bell .catAvatar::after {
+  content: "铃";
+}
+
+.cat-cloud .catAvatar {
+  background: #d7ecff;
+}
+
+.cat-cloud .catAvatar::after {
+  content: "云";
+}
+
+.cat-star .catAvatar {
+  background: #f7df8f;
+}
+
+.cat-star .catAvatar::after {
+  content: "星";
+}
+
+.mood-happy .catAvatar {
+  transform: rotate(-2deg);
+}
+
+.mood-proud .catAvatar {
+  transform: translateY(-2px);
 }
 
 .taskCard {
