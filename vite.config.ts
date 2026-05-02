@@ -9,6 +9,6 @@ export default defineConfig({
     setupFiles: ["@testing-library/jest-dom/vitest"],
     globals: true,
     passWithNoTests: true,
-    exclude: ["**/node_modules/**", "**/dist/**", "**/e2e/**"]
+    exclude: ["**/node_modules/**", "**/dist/**", "**/e2e/**", "**/.worktrees/**"]
   }
 });

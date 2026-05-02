@@ -28,7 +28,8 @@ describe("focus sessions", () => {
     const started = startFocusSession(testState({ tasks: { [task.id]: task } }), task.id, "2026-04-28T08:00:00+08:00");
     const completed = completeFocusSession(started, "2026-04-28T08:15:00+08:00");
 
-    expect(completed.pet.energy).toBe(10);
+    expect(completed.pet.energy).toBe(50);
+    expect(completed.pet.experience).toBe(10);
     expect(completed.reviews["2026-04-28"].focusMinutes).toBe(15);
     expect(completed.activeSessionId).toBeUndefined();
   });
@@ -40,6 +41,7 @@ describe("focus sessions", () => {
     const session = Object.values(interrupted.focusSessions)[0];
 
     expect(session.interruptions).toBe(1);
-    expect(interrupted.pet.energy).toBe(0);
+    expect(interrupted.pet.energy).toBe(40);
+    expect(interrupted.pet.experience).toBe(0);
   });
 });
