@@ -2,20 +2,39 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { copyUnfinishedTasksToToday, rolloverToDate } from "../domain/dayRollover";
 import { createDefaultState } from "../domain/defaultState";
 import { completeFocusSession, recordInterruption, startFocusSession } from "../domain/focus";
+import { createRecurringTaskTemplate, pauseRecurringTaskTemplate, type NewRecurringTaskInput } from "../domain/recurrence";
 import { refreshDailyReview } from "../domain/review";
-import { addTask, confirmTask, markTaskComplete, requestTaskAdjustment, type NewTaskInput } from "../domain/tasks";
+import {
+  addTask,
+  archiveTask,
+  cancelTask,
+  confirmTask,
+  deleteTask,
+  markTaskComplete,
+  requestTaskAdjustment,
+  updateTask,
+  type CompletionDetailsInput,
+  type NewTaskInput,
+  type UpdateTaskInput
+} from "../domain/tasks";
 import type { AppMode, Settings, StudyState } from "../domain/types";
 import { clearStudyState, loadStudyState, saveStudyState } from "../storage/localStore";
 
 interface StudyActions {
   setMode(mode: AppMode): void;
   addTask(input: NewTaskInput): void;
+  addRecurringTask(input: Omit<NewRecurringTaskInput, "createdAt">): void;
+  pauseRecurringTask(templateId: string): void;
+  updateTask(taskId: string, input: UpdateTaskInput): void;
+  deleteTask(taskId: string): void;
+  cancelTask(taskId: string): void;
+  archiveTask(taskId: string): void;
   updateSettings(settings: Partial<Settings>): void;
   startFocus(taskId: string): void;
   completeFocus(): void;
   interruptFocus(): void;
-  markComplete(taskId: string): void;
-  confirm(taskId: string): void;
+  markComplete(taskId: string, details?: CompletionDetailsInput): void;
+  confirm(taskId: string, parentComment?: string): void;
   adjust(taskId: string): void;
   copyUnfinished(fromDateKey: string): void;
   resetData(): void;
@@ -43,6 +62,24 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
       addTask(input) {
         setState((current) => addTask(current, input));
       },
+      addRecurringTask(input) {
+        setState((current) => createRecurringTaskTemplate(current, { ...input, createdAt: new Date().toISOString() }));
+      },
+      pauseRecurringTask(templateId) {
+        setState((current) => pauseRecurringTaskTemplate(current, templateId));
+      },
+      updateTask(taskId, input) {
+        setState((current) => updateTask(current, taskId, input));
+      },
+      deleteTask(taskId) {
+        setState((current) => deleteTask(current, taskId));
+      },
+      cancelTask(taskId) {
+        setState((current) => cancelTask(current, taskId, new Date().toISOString()));
+      },
+      archiveTask(taskId) {
+        setState((current) => archiveTask(current, taskId, new Date().toISOString()));
+      },
       updateSettings(settings) {
         setState((current) => ({
           ...current,
@@ -58,11 +95,11 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
       interruptFocus() {
         setState((current) => recordInterruption(current));
       },
-      markComplete(taskId) {
-        setState((current) => refreshDailyReview(markTaskComplete(current, taskId, new Date().toISOString())));
+      markComplete(taskId, details) {
+        setState((current) => refreshDailyReview(markTaskComplete(current, taskId, new Date().toISOString(), details)));
       },
-      confirm(taskId) {
-        setState((current) => refreshDailyReview(confirmTask(current, taskId)));
+      confirm(taskId, parentComment) {
+        setState((current) => refreshDailyReview(confirmTask(current, taskId, parentComment)));
       },
       adjust(taskId) {
         setState((current) => requestTaskAdjustment(current, taskId));
