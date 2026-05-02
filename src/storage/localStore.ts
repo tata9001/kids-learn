@@ -1,18 +1,81 @@
 import { createDefaultState } from "../domain/defaultState";
-import type { StudyState } from "../domain/types";
+import type { PetState, StudyState, Task } from "../domain/types";
 
 export const STORAGE_KEY = "study-companion-state";
 
-function isStudyState(value: unknown): value is StudyState {
+type VersionOneTask = Task & {
+  actualReadingMinutes?: number;
+  bookName?: string;
+};
+
+type VersionOneState = Omit<StudyState, "version" | "recurringTaskTemplates" | "pet" | "tasks"> & {
+  version: 1;
+  tasks: Record<string, VersionOneTask>;
+  pet: Omit<PetState, "experience" | "experienceToNextLevel" | "recentReward" | "nextUnlock">;
+};
+
+function isObject(value: unknown): value is Record<string, unknown> {
+  return Boolean(value && typeof value === "object");
+}
+
+function isVersionTwoStudyState(value: unknown): value is StudyState {
   return Boolean(
-    value &&
-      typeof value === "object" &&
+    isObject(value) &&
       "version" in value &&
-      (value as { version: unknown }).version === 1 &&
+      value.version === 2 &&
+      "profile" in value &&
+      "tasks" in value &&
+      "pet" in value &&
+      "recurringTaskTemplates" in value
+  );
+}
+
+function isVersionOneStudyState(value: unknown): value is VersionOneState {
+  return Boolean(
+    isObject(value) &&
+      "version" in value &&
+      value.version === 1 &&
       "profile" in value &&
       "tasks" in value &&
       "pet" in value
   );
+}
+
+function migrateTask(task: VersionOneTask): Task {
+  const completionDetails =
+    task.actualReadingMinutes || task.bookName
+      ? {
+          actualReadingMinutes: task.actualReadingMinutes,
+          bookName: task.bookName
+        }
+      : task.completionDetails;
+  const { actualReadingMinutes: _actualReadingMinutes, bookName: _bookName, ...nextTask } = task;
+
+  return {
+    ...nextTask,
+    completionDetails
+  };
+}
+
+export function migrateStudyState(value: unknown): StudyState {
+  if (isVersionTwoStudyState(value)) return value;
+  if (!isVersionOneStudyState(value)) return createDefaultState();
+
+  const tasks = Object.fromEntries(Object.entries(value.tasks).map(([id, task]) => [id, migrateTask(task)]));
+
+  return {
+    ...value,
+    version: 2,
+    tasks,
+    recurringTaskTemplates: {},
+    pet: {
+      ...value.pet,
+      experience: 0,
+      experienceToNextLevel: 40,
+      recentReward: "小猫在等第一个学习奖励",
+      nextUnlock: "等级 2 解锁铃铛小猫"
+    }
+  };
 }
 
 export function loadStudyState(): StudyState {
@@ -20,7 +83,7 @@ export function loadStudyState(): StudyState {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return createDefaultState();
     const parsed = JSON.parse(raw);
-    return isStudyState(parsed) ? parsed : createDefaultState();
+    return migrateStudyState(parsed);
   } catch {
     return createDefaultState();
   }
