@@ -38,13 +38,16 @@ export function createRecurringTaskTemplate(state: StudyState, input: NewRecurri
     generatedDateKeys: []
   };
 
-  return {
+  const nextState: StudyState = {
     ...state,
     recurringTaskTemplates: {
       ...state.recurringTaskTemplates,
       [id]: template
     }
   };
+
+  const createdDate = new Date(input.createdAt);
+  return todayKey(createdDate) === state.todayKey ? generateDueRecurringTasks(nextState, createdDate) : nextState;
 }
 
 export function pauseRecurringTaskTemplate(state: StudyState, templateId: string): StudyState {

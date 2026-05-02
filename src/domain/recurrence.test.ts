@@ -8,6 +8,24 @@ import { deleteTask } from "./tasks";
 import { testState } from "../test/testState";
 
 describe("recurrence domain", () => {
+  it("creates today's task instance when a new template is due today", () => {
+    const state = createRecurringTaskTemplate(testState(), {
+      name: "当天阅读",
+      type: "reading",
+      estimatedFocusBlocks: 1,
+      completionStandard: "读 15 分钟",
+      requiresConfirmation: false,
+      recurrence: "daily",
+      createdAt: "2026-04-28T08:00:00+08:00"
+    });
+
+    expect(state.tasks["task-template-1-2026-04-28"]).toMatchObject({
+      name: "当天阅读",
+      dateKey: "2026-04-28",
+      recurringTemplateId: "template-1"
+    });
+  });
+
   it("generates daily task instances once per date", () => {
     const state = createRecurringTaskTemplate(testState(), {
       name: "每日阅读",
@@ -60,7 +78,7 @@ describe("recurrence domain", () => {
       completionStandard: "写一页",
       requiresConfirmation: true,
       recurrence: "daily",
-      createdAt: "2026-04-28T08:00:00+08:00"
+      createdAt: "2026-04-27T08:00:00+08:00"
     });
 
     const paused = pauseRecurringTaskTemplate(state, "template-1");
