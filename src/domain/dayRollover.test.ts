@@ -11,6 +11,34 @@ describe("day rollover", () => {
     expect(next.reviews["2026-04-29"]).toBeDefined();
   });
 
+  it("generates due recurring tasks when the date changes", () => {
+    const state = testState({
+      recurringTaskTemplates: {
+        "template-1": {
+          id: "template-1",
+          name: "每日阅读",
+          type: "reading",
+          estimatedFocusBlocks: 1,
+          completionStandard: "读 15 分钟",
+          requiresConfirmation: false,
+          recurrence: "daily",
+          weekdays: [],
+          paused: false,
+          createdAt: "2026-04-28T08:00:00+08:00",
+          generatedDateKeys: []
+        }
+      }
+    });
+
+    const next = rolloverToDate(state, new Date("2026-04-29T07:00:00+08:00"));
+
+    expect(next.tasks["task-template-1-2026-04-29"]).toMatchObject({
+      name: "每日阅读",
+      dateKey: "2026-04-29",
+      recurringTemplateId: "template-1"
+    });
+  });
+
   it("copies unfinished tasks to the new day without changing yesterday", () => {
     const task = testTask({ status: "not-started", dateKey: "2026-04-28" });
     const state = rolloverToDate(testState({ tasks: { [task.id]: task } }), new Date("2026-04-29T07:00:00+08:00"));

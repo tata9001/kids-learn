@@ -1,22 +1,26 @@
 import { createEmptyReview } from "./defaultState";
 import { todayKey } from "./date";
+import { generateDueRecurringTasks } from "./recurrence";
 import type { StudyState, Task } from "./types";
 
 export function rolloverToDate(state: StudyState, date: Date): StudyState {
   const key = todayKey(date);
   if (key === state.todayKey) return state;
 
-  return {
-    ...state,
-    todayKey: key,
-    activeTaskId: undefined,
-    activeSessionId: undefined,
-    mode: "home",
-    reviews: {
-      ...state.reviews,
-      [key]: state.reviews[key] ?? createEmptyReview(key)
-    }
-  };
+  return generateDueRecurringTasks(
+    {
+      ...state,
+      todayKey: key,
+      activeTaskId: undefined,
+      activeSessionId: undefined,
+      mode: "home",
+      reviews: {
+        ...state.reviews,
+        [key]: state.reviews[key] ?? createEmptyReview(key)
+      }
+    },
+    date
+  );
 }
 
 export function copyUnfinishedTasksToToday(state: StudyState, fromDateKey: string): StudyState {
