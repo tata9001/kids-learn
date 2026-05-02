@@ -17,7 +17,7 @@ export function createDefaultState(now = new Date()): StudyState {
   const key = todayKey(now);
 
   return {
-    version: 1,
+    version: 2,
     mode: "home",
     todayKey: key,
     profile: {
@@ -33,14 +33,19 @@ export function createDefaultState(now = new Date()): StudyState {
       dailyGoalHabits: 1
     },
     tasks: {},
+    recurringTaskTemplates: {},
     focusSessions: {},
     pet: {
       level: 1,
-      energy: 0,
+      energy: 40,
+      experience: 0,
+      experienceToNextLevel: 40,
       mood: "calm",
       careItems: 0,
       unlockedDecorations: [],
-      streakDays: 0
+      streakDays: 0,
+      recentReward: "小猫在等第一个学习奖励",
+      nextUnlock: "等级 2 解锁铃铛小猫"
     },
     reviews: {
       [key]: createEmptyReview(key)

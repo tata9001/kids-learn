@@ -2,13 +2,17 @@ export type AppMode = "home" | "child" | "parent" | "focus";
 export type TaskType = "homework" | "reading" | "handwriting" | "organization";
 export type Subject = "chinese" | "math" | "english" | "other";
 export type FocusPresentation = "quiet" | "lively";
+export type DifficultyLevel = "none" | "a-little" | "needs-parent";
+export type RecurrenceKind = "once" | "daily" | "weekly";
 export type TaskStatus =
   | "not-started"
   | "focusing"
   | "child-marked-complete"
   | "waiting-confirmation"
   | "completed"
-  | "needs-adjustment";
+  | "needs-adjustment"
+  | "canceled"
+  | "archived";
 
 export interface Profile {
   familyName: string;
@@ -24,6 +28,13 @@ export interface Settings {
   dailyGoalHabits: number;
 }
 
+export interface CompletionDetails {
+  childNote?: string;
+  difficulty?: DifficultyLevel;
+  actualReadingMinutes?: number;
+  bookName?: string;
+}
+
 export interface Task {
   id: string;
   name: string;
@@ -34,9 +45,27 @@ export interface Task {
   requiresConfirmation: boolean;
   status: TaskStatus;
   dateKey: string;
-  actualReadingMinutes?: number;
-  bookName?: string;
+  recurringTemplateId?: string;
+  completionDetails?: CompletionDetails;
+  parentComment?: string;
   completedAt?: string;
+  canceledAt?: string;
+  archivedAt?: string;
+}
+
+export interface RecurringTaskTemplate {
+  id: string;
+  name: string;
+  type: TaskType;
+  subject?: Subject;
+  estimatedFocusBlocks: number;
+  completionStandard: string;
+  requiresConfirmation: boolean;
+  recurrence: Exclude<RecurrenceKind, "once">;
+  weekdays: number[];
+  paused: boolean;
+  createdAt: string;
+  generatedDateKeys: string[];
 }
 
 export interface FocusSession {
@@ -52,10 +81,14 @@ export interface FocusSession {
 export interface PetState {
   level: number;
   energy: number;
+  experience: number;
+  experienceToNextLevel: number;
   mood: "calm" | "happy" | "proud";
   careItems: number;
   unlockedDecorations: string[];
   streakDays: number;
+  recentReward: string;
+  nextUnlock: string;
 }
 
 export interface DailyReview {
@@ -69,7 +102,7 @@ export interface DailyReview {
 }
 
 export interface StudyState {
-  version: 1;
+  version: 2;
   mode: AppMode;
   todayKey: string;
   activeTaskId?: string;
@@ -77,6 +110,7 @@ export interface StudyState {
   profile: Profile;
   settings: Settings;
   tasks: Record<string, Task>;
+  recurringTaskTemplates: Record<string, RecurringTaskTemplate>;
   focusSessions: Record<string, FocusSession>;
   pet: PetState;
   reviews: Record<string, DailyReview>;

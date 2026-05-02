@@ -13,6 +13,12 @@ describe("createDefaultState", () => {
     expect(state.settings.focusPresentation).toBe("quiet");
     expect(state.todayKey).toBe("2026-04-28");
     expect(state.reviews[state.todayKey].dateKey).toBe("2026-04-28");
+    expect(state.version).toBe(2);
+    expect(state.recurringTaskTemplates).toEqual({});
+    expect(state.pet.experience).toBe(0);
+    expect(state.pet.experienceToNextLevel).toBe(40);
+    expect(state.pet.recentReward).toContain("小猫");
+    expect(state.pet.nextUnlock).toContain("铃铛");
   });
 
   it("uses stable date keys", () => {
