@@ -239,6 +239,25 @@ textarea {
   font-weight: 700;
 }
 
+.catReward {
+  color: #1f5b52;
+  font-weight: 800;
+}
+
+.xpTrack {
+  height: 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #d6e5de;
+}
+
+.xpTrack span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #f0b84a;
+}
+
 .cat-bell .catAvatar::after,
 .cat-cloud .catAvatar::after,
 .cat-star .catAvatar::after {
@@ -298,6 +317,12 @@ textarea {
   margin: 0 0 8px;
 }
 
+.taskDetail {
+  color: #4e625d;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
 .statusPill {
   display: inline-flex;
   align-items: center;
@@ -311,6 +336,8 @@ textarea {
 
 .taskActions {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   gap: 10px;
 }
 
@@ -434,16 +461,39 @@ label {
 }
 
 input,
-select {
+select,
+textarea {
   min-height: 44px;
   border: 1px solid #bdd5cc;
   border-radius: 8px;
   padding: 0 12px;
 }
 
+textarea {
+  min-height: 86px;
+  padding: 10px 12px;
+  resize: vertical;
+}
+
 .confirmationRow {
   display: grid;
   gap: 10px;
+}
+
+.completionPanel,
+.editTaskPanel {
+  display: grid;
+  gap: 12px;
+  border: 1px solid #d6e5de;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 16px;
+}
+
+.weekdayRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .reviewGrid {

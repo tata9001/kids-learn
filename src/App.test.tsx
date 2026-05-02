@@ -3,6 +3,8 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it } from "vitest";
 import { App } from "./App";
 import { StudyProvider } from "./state/useStudyStore";
+import { createDefaultState } from "./domain/defaultState";
+import { STORAGE_KEY } from "./storage/localStore";
 
 function renderApp() {
   return render(
@@ -65,4 +67,86 @@ it("lets parents configure tasks, confirm completion, and reset data", async () 
 
   expect(screen.getByRole("button", { name: "导出数据" })).toBeInTheDocument();
   expect(screen.getByRole("button", { name: "清空数据" })).toBeInTheDocument();
+});
+
+it("lets parents edit and delete not-started tasks", async () => {
+  const user = userEvent.setup();
+  renderApp();
+
+  await user.click(screen.getByRole("button", { name: "家长模式" }));
+  await user.type(screen.getByLabelText("任务名称"), "阅读");
+  await user.click(screen.getByRole("button", { name: "添加任务" }));
+  await user.click(screen.getByRole("button", { name: "编辑 阅读" }));
+  await user.clear(screen.getByLabelText("编辑任务名称"));
+  await user.type(screen.getByLabelText("编辑任务名称"), "新阅读");
+  await user.click(screen.getByRole("button", { name: "保存任务" }));
+
+  expect(screen.getByRole("heading", { name: "新阅读" })).toBeInTheDocument();
+
+  await user.click(screen.getByRole("button", { name: "删除 新阅读" }));
+  expect(screen.queryByRole("heading", { name: "新阅读" })).not.toBeInTheDocument();
+});
+
+it("lets children add completion details and parents confirm with a comment", async () => {
+  const user = userEvent.setup();
+  renderApp();
+
+  await user.click(screen.getByRole("button", { name: "家长模式" }));
+  await user.type(screen.getByLabelText("任务名称"), "阅读");
+  await user.selectOptions(screen.getByLabelText("任务类型"), "reading");
+  await user.click(screen.getByRole("button", { name: "添加任务" }));
+  await user.click(screen.getByRole("button", { name: "回到首页" }));
+  await user.click(screen.getByRole("button", { name: "孩子模式" }));
+  await user.click(screen.getByRole("button", { name: "完成 阅读" }));
+  await user.type(screen.getByLabelText("完成说明"), "读完第一章");
+  await user.selectOptions(screen.getByLabelText("困难程度"), "a-little");
+  await user.type(screen.getByLabelText("实际阅读分钟"), "18");
+  await user.type(screen.getByLabelText("书名"), "小猫数学");
+  await user.click(screen.getByRole("button", { name: "提交完成" }));
+
+  await user.click(screen.getByRole("button", { name: "回到首页" }));
+  await user.click(screen.getByRole("button", { name: "家长模式" }));
+  expect(screen.getByText("读完第一章")).toBeInTheDocument();
+  expect(screen.getByText("18 分钟 · 小猫数学")).toBeInTheDocument();
+
+  await user.type(screen.getByLabelText("确认评语 阅读"), "很认真");
+  await user.click(screen.getByRole("button", { name: "确认 阅读" }));
+  expect(screen.getByText("很认真")).toBeInTheDocument();
+});
+
+it("generates matching weekly recurring tasks and shows pet progress", async () => {
+  const state = createDefaultState(new Date("2026-05-01T08:00:00+08:00"));
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify({
+      ...state,
+      recurringTaskTemplates: {
+        "template-1": {
+          id: "template-1",
+          name: "周六整理",
+          type: "organization",
+          estimatedFocusBlocks: 1,
+          completionStandard: "整理书桌",
+          requiresConfirmation: false,
+          recurrence: "weekly",
+          weekdays: [6],
+          paused: false,
+          createdAt: "2026-05-01T08:00:00+08:00",
+          generatedDateKeys: []
+        }
+      }
+    })
+  );
+  const user = userEvent.setup();
+  renderApp();
+
+  await user.click(screen.getByRole("button", { name: "孩子模式" }));
+
+  expect(screen.getByRole("heading", { name: "周六整理" })).toBeInTheDocument();
+  expect(screen.getByText(/经验 0\/40/)).toBeInTheDocument();
+
+  await user.click(screen.getByRole("button", { name: "完成 周六整理" }));
+  await user.click(screen.getByRole("button", { name: "提交完成" }));
+  expect(screen.getByText(/经验 20\/40/)).toBeInTheDocument();
+  expect(screen.getByText(/完成一个任务/)).toBeInTheDocument();
 });

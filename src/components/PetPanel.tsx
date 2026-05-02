@@ -46,6 +46,7 @@ function getCatStage(level: number): CatStage {
 export function PetPanel({ pet }: { pet: PetState }) {
   const stage = getCatStage(pet.level);
   const decorations = pet.unlockedDecorations.length > 0 ? pet.unlockedDecorations.length : 0;
+  const progress = Math.min(100, Math.round((pet.experience / pet.experienceToNextLevel) * 100));
 
   return (
     <section className={`petPanel mood-${pet.mood} cat-${stage.className}`} aria-label="小猫伙伴">
@@ -67,11 +68,16 @@ export function PetPanel({ pet }: { pet: PetState }) {
         <p className="catSkill">{stage.skill}</p>
         <div className="catStats" aria-label="小猫成长数据">
           <span>能量 {pet.energy}</span>
+          <span>经验 {pet.experience}/{pet.experienceToNextLevel}</span>
           <span>连续 {pet.streakDays} 天</span>
           <span>小鱼干 {pet.careItems}</span>
           <span>收藏 {decorations}</span>
         </div>
-        <p className="catNextGoal">{stage.nextGoal}</p>
+        <div className="xpTrack" aria-label={`经验 ${pet.experience}/${pet.experienceToNextLevel}`}>
+          <span style={{ width: `${progress}%` }} />
+        </div>
+        <p className="catReward">{pet.recentReward}</p>
+        <p className="catNextGoal">{pet.nextUnlock || stage.nextGoal}</p>
       </div>
     </section>
   );
