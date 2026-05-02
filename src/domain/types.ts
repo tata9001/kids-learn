@@ -48,6 +48,7 @@ export interface Task {
   recurringTemplateId?: string;
   completionDetails?: CompletionDetails;
   parentComment?: string;
+  rewardGranted?: boolean;
   completedAt?: string;
   canceledAt?: string;
   archivedAt?: string;
