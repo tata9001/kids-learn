@@ -1,4 +1,4 @@
-export type AppMode = "home" | "child" | "parent" | "focus";
+export type AppMode = "home" | "child" | "parent" | "focus" | "cats";
 export type TaskType = "homework" | "reading" | "handwriting" | "organization";
 export type Subject = "chinese" | "math" | "english" | "other";
 export type FocusPresentation = "quiet" | "lively";

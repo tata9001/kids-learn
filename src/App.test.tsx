@@ -150,3 +150,22 @@ it("generates matching weekly recurring tasks and shows pet progress", async () 
   expect(screen.getByText(/经验 20\/40/)).toBeInTheDocument();
   expect(screen.getByText(/完成一个任务/)).toBeInTheDocument();
 });
+
+it("shows a kitten gallery with growth stages and stat meanings", async () => {
+  const user = userEvent.setup();
+  renderApp();
+
+  await user.click(screen.getByRole("button", { name: "孩子模式" }));
+  await user.click(screen.getByRole("button", { name: "查看小猫图鉴" }));
+
+  expect(screen.getByRole("heading", { name: "小猫图鉴" })).toBeInTheDocument();
+  expect(screen.getByText("奶糖小猫")).toBeInTheDocument();
+  expect(screen.getByText("铃铛小猫")).toBeInTheDocument();
+  expect(screen.getByText("云朵小猫")).toBeInTheDocument();
+  expect(screen.getByText("星星小猫")).toBeInTheDocument();
+  expect(screen.getByText("能量")).toBeInTheDocument();
+  expect(screen.getByText("经验")).toBeInTheDocument();
+  expect(screen.getByText("连续")).toBeInTheDocument();
+  expect(screen.getByText("小鱼干")).toBeInTheDocument();
+  expect(screen.getByText("收藏")).toBeInTheDocument();
+});

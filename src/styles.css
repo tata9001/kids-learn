@@ -296,12 +296,332 @@ textarea {
   content: "星";
 }
 
+.catFigure {
+  position: relative;
+  display: grid;
+  flex: 0 0 auto;
+  width: 164px;
+  height: 156px;
+  place-items: center;
+  transform-origin: 50% 85%;
+  animation: catFloat 3.8s ease-in-out infinite;
+}
+
+.catFigure-small {
+  width: 132px;
+  height: 124px;
+}
+
+.catShadow {
+  position: absolute;
+  bottom: 10px;
+  width: 104px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(38, 50, 56, 0.12);
+  animation: shadowPulse 3.8s ease-in-out infinite;
+}
+
+.catBody {
+  position: absolute;
+  bottom: 18px;
+  width: 96px;
+  height: 82px;
+  border: 3px solid #263238;
+  border-radius: 44% 44% 34% 34%;
+  background: #f8bf57;
+  box-shadow: inset -14px -12px 0 rgba(255, 255, 255, 0.22);
+}
+
+.catChest {
+  position: absolute;
+  right: 16px;
+  bottom: 10px;
+  width: 34px;
+  height: 46px;
+  border-radius: 50%;
+  background: rgba(255, 247, 221, 0.75);
+}
+
+.catPaw {
+  position: absolute;
+  bottom: -7px;
+  width: 28px;
+  height: 18px;
+  border: 3px solid #263238;
+  border-radius: 999px;
+  background: #ffe0a3;
+}
+
+.catPawLeft {
+  left: 18px;
+}
+
+.catPawRight {
+  right: 18px;
+}
+
+.catTail {
+  position: absolute;
+  right: 17px;
+  bottom: 35px;
+  width: 58px;
+  height: 28px;
+  border: 10px solid #db933b;
+  border-left: 0;
+  border-radius: 0 999px 999px 0;
+  transform-origin: 0 50%;
+  animation: tailWave 2.9s ease-in-out infinite;
+}
+
+.catHead {
+  position: absolute;
+  top: 10px;
+  width: 104px;
+  height: 94px;
+  border: 3px solid #263238;
+  border-radius: 48% 48% 44% 44%;
+  background: #ffd36f;
+  box-shadow: inset -12px -12px 0 rgba(255, 255, 255, 0.28);
+}
+
+.catFigure .catEar {
+  position: absolute;
+  top: -16px;
+  width: 34px;
+  height: 42px;
+  border: 3px solid #263238;
+  background: inherit;
+  transform: rotate(45deg);
+}
+
+.catFigure .catEarLeft {
+  left: 16px;
+  border-radius: 8px 0 8px 0;
+}
+
+.catFigure .catEarRight {
+  right: 16px;
+  border-radius: 8px 0 8px 0;
+}
+
+.catInnerEar {
+  position: absolute;
+  top: -5px;
+  width: 16px;
+  height: 20px;
+  border-radius: 5px 0 5px 0;
+  background: #f49aa0;
+  transform: rotate(45deg);
+}
+
+.catInnerEarLeft {
+  left: 25px;
+}
+
+.catInnerEarRight {
+  right: 25px;
+}
+
+.catStripe {
+  position: absolute;
+  top: 10px;
+  width: 10px;
+  height: 24px;
+  border-radius: 999px;
+  background: #d7892e;
+}
+
+.catStripeLeft {
+  left: 39px;
+  transform: rotate(-18deg);
+}
+
+.catStripeRight {
+  right: 39px;
+  transform: rotate(18deg);
+}
+
+.catFigure .catEye {
+  position: absolute;
+  top: 44px;
+  width: 11px;
+  height: 14px;
+  border-radius: 50%;
+  background: #263238;
+  animation: catBlink 5.4s infinite;
+}
+
+.catEyeLeft {
+  left: 31px;
+}
+
+.catEyeRight {
+  right: 31px;
+}
+
+.catBlush {
+  position: absolute;
+  top: 59px;
+  width: 17px;
+  height: 9px;
+  border-radius: 50%;
+  background: rgba(241, 116, 121, 0.32);
+}
+
+.catBlushLeft {
+  left: 16px;
+}
+
+.catBlushRight {
+  right: 16px;
+}
+
+.catFigure .catNose {
+  position: absolute;
+  top: 56px;
+  left: 50%;
+  width: 10px;
+  height: 8px;
+  border-radius: 50% 50% 70% 70%;
+  background: #263238;
+  transform: translateX(-50%);
+}
+
+.catFigure .catMouth {
+  position: absolute;
+  top: 64px;
+  left: 50%;
+  width: 20px;
+  height: 11px;
+  border-right: 3px solid #263238;
+  border-bottom: 3px solid #263238;
+  border-left: 3px solid #263238;
+  border-radius: 0 0 999px 999px;
+  transform: translateX(-50%);
+}
+
+.catWhisker {
+  position: absolute;
+  width: 25px;
+  height: 2px;
+  border-radius: 999px;
+  background: #263238;
+}
+
+.catWhiskerLeftA {
+  top: 56px;
+  left: -4px;
+  transform: rotate(8deg);
+}
+
+.catWhiskerLeftB {
+  top: 68px;
+  left: -2px;
+  transform: rotate(-8deg);
+}
+
+.catWhiskerRightA {
+  top: 56px;
+  right: -4px;
+  transform: rotate(-8deg);
+}
+
+.catWhiskerRightB {
+  top: 68px;
+  right: -2px;
+  transform: rotate(8deg);
+}
+
+.catFigure .catBadge {
+  position: absolute;
+  right: 22px;
+  bottom: 22px;
+  display: grid;
+  min-width: 32px;
+  height: 32px;
+  place-items: center;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: #226b5f;
+  color: #fff;
+  font-weight: 900;
+}
+
+.catAccessory {
+  position: absolute;
+  z-index: 2;
+}
+
+.cat-bell .catAccessory {
+  bottom: 53px;
+  left: 50%;
+  width: 22px;
+  height: 22px;
+  border: 3px solid #263238;
+  border-radius: 50% 50% 45% 45%;
+  background: #f4c84d;
+  transform: translateX(-50%);
+}
+
+.cat-bell .catAccessory::after {
+  position: absolute;
+  bottom: 3px;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #263238;
+  content: "";
+  transform: translateX(-50%);
+}
+
+.cat-cloud .catBody,
+.cat-cloud .catHead,
+.cat-cloud .catTail {
+  background-color: #cfeeff;
+  border-color: #24445a;
+}
+
+.cat-cloud .catAccessory {
+  right: 18px;
+  bottom: 22px;
+  width: 48px;
+  height: 24px;
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: -16px 4px 0 #ffffff, 12px 3px 0 #ffffff;
+}
+
+.cat-star .catBody,
+.cat-star .catHead {
+  background: #ffe08a;
+}
+
+.cat-star .catAccessory {
+  top: 3px;
+  right: 24px;
+  width: 28px;
+  height: 28px;
+  background: #f3c74a;
+  clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 56%, 80% 93%, 50% 70%, 20% 93%, 32% 56%, 2% 35%, 39% 35%);
+  filter: drop-shadow(0 2px 0 #263238);
+}
+
 .mood-happy .catAvatar {
   transform: rotate(-2deg);
 }
 
 .mood-proud .catAvatar {
   transform: translateY(-2px);
+}
+
+.mood-happy .catFigure {
+  animation-duration: 2.4s;
+}
+
+.mood-proud .catFigure {
+  animation-name: catProud;
 }
 
 .taskCard {
@@ -522,9 +842,179 @@ textarea {
   background: #fff7d8;
 }
 
+.compactButton {
+  width: fit-content;
+}
+
+.catGallery {
+  display: grid;
+  gap: 22px;
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.galleryHero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(260px, 0.7fr);
+  gap: 18px;
+  align-items: center;
+  border: 1px solid #d6e5de;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 22px;
+  box-shadow: 0 10px 30px rgba(38, 50, 56, 0.08);
+}
+
+.galleryHero h2,
+.galleryHero p {
+  margin: 0 0 10px;
+}
+
+.galleryHero h2 {
+  font-size: 2rem;
+}
+
+.galleryHeroStats,
+.statGuideGrid {
+  display: grid;
+  gap: 10px;
+}
+
+.galleryHeroStats span {
+  min-height: 42px;
+  border-radius: 8px;
+  background: #e5f1ed;
+  color: #1f5b52;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  font-weight: 900;
+}
+
+.catStageGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.catStageCard,
+.statGuideCard {
+  border: 1px solid #d6e5de;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 10px 30px rgba(38, 50, 56, 0.06);
+}
+
+.catStageCard {
+  display: grid;
+  grid-template-columns: 132px minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+  padding: 16px;
+}
+
+.catStageCard h3,
+.catStageCard p,
+.statGuideCard h3,
+.statGuideCard p,
+.statGuide h2 {
+  margin: 0 0 8px;
+}
+
+.isLocked {
+  opacity: 0.72;
+}
+
+.isLocked .catFigure {
+  filter: grayscale(0.5);
+}
+
+.statGuide {
+  display: grid;
+  gap: 14px;
+}
+
+.statGuideGrid {
+  grid-template-columns: repeat(5, minmax(160px, 1fr));
+}
+
+.statGuideCard {
+  padding: 16px;
+}
+
+.statGuideCard h3 {
+  color: #226b5f;
+  font-size: 1.2rem;
+}
+
+@keyframes catFloat {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-1deg);
+  }
+  50% {
+    transform: translateY(-7px) rotate(1deg);
+  }
+}
+
+@keyframes catProud {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-8px) scale(1.03);
+  }
+}
+
+@keyframes shadowPulse {
+  0%,
+  100% {
+    transform: scaleX(1);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scaleX(0.82);
+    opacity: 0.42;
+  }
+}
+
+@keyframes tailWave {
+  0%,
+  100% {
+    transform: rotate(-4deg);
+  }
+  50% {
+    transform: rotate(10deg);
+  }
+}
+
+@keyframes catBlink {
+  0%,
+  92%,
+  100% {
+    transform: scaleY(1);
+  }
+  95% {
+    transform: scaleY(0.12);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .catFigure,
+  .catShadow,
+  .catTail,
+  .catFigure .catEye {
+    animation: none;
+  }
+}
+
 @media (max-width: 820px) {
   .parentGrid,
-  .reviewGrid {
+  .reviewGrid,
+  .galleryHero,
+  .catStageGrid,
+  .statGuideGrid {
     grid-template-columns: 1fr;
   }
 }

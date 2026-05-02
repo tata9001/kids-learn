@@ -1,3 +1,4 @@
+import { CatGallery } from "./components/CatGallery";
 import { ChildDashboard } from "./components/ChildDashboard";
 import { FocusView } from "./components/FocusView";
 import { Home } from "./components/Home";
@@ -38,6 +39,15 @@ export function App() {
       <main className="appShell">
         <Header title="家长模式" />
         <ParentDashboard />
+      </main>
+    );
+  }
+
+  if (state.mode === "cats") {
+    return (
+      <main className="appShell">
+        <Header title="小猫图鉴" />
+        <CatGallery pet={state.pet} />
       </main>
     );
   }
