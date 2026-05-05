@@ -189,3 +189,31 @@ it("opens a fullscreen kitten interaction panel from the kitten", async () => {
 
   expect(screen.getAllByText(/喵/).length).toBeGreaterThan(0);
 });
+
+it("lets children buy and wear kitten decorations in the interaction panel", async () => {
+  const state = createDefaultState();
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify({
+      ...state,
+      pet: {
+        ...state.pet,
+        careItems: 3
+      }
+    })
+  );
+  const user = userEvent.setup();
+  renderApp();
+
+  await user.click(screen.getByRole("button", { name: "孩子模式" }));
+  await user.click(screen.getByRole("button", { name: "和小猫互动" }));
+
+  expect(screen.getByRole("heading", { name: "装饰小猫" })).toBeInTheDocument();
+  expect(screen.getByText("粉色蝴蝶结")).toBeInTheDocument();
+
+  await user.click(screen.getByRole("button", { name: "兑换 粉色蝴蝶结，2 小鱼干" }));
+
+  expect(screen.getByText(/已穿上/)).toBeInTheDocument();
+  expect(screen.getAllByText(/小鱼干 1/).length).toBeGreaterThan(0);
+  expect(screen.getAllByText(/粉色蝴蝶结/).length).toBeGreaterThan(0);
+});

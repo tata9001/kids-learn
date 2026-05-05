@@ -11,7 +11,10 @@ type VersionOneTask = Task & {
 type VersionOneState = Omit<StudyState, "version" | "recurringTaskTemplates" | "pet" | "tasks"> & {
   version: 1;
   tasks: Record<string, VersionOneTask>;
-  pet: Omit<PetState, "experience" | "experienceToNextLevel" | "recentReward" | "nextUnlock">;
+  pet: Omit<
+    PetState,
+    "experience" | "experienceToNextLevel" | "recentReward" | "nextUnlock" | "ownedDecorationIds" | "equippedDecorationId"
+  >;
 };
 
 function isObject(value: unknown): value is Record<string, unknown> {
@@ -57,8 +60,28 @@ function migrateTask(task: VersionOneTask): Task {
   };
 }
 
+function normalizePet(pet: Partial<PetState>): PetState {
+  const defaults = createDefaultState().pet;
+  const ownedDecorationIds = pet.ownedDecorationIds ?? [];
+  const equippedDecorationId =
+    pet.equippedDecorationId && ownedDecorationIds.includes(pet.equippedDecorationId) ? pet.equippedDecorationId : undefined;
+
+  return {
+    ...defaults,
+    ...pet,
+    unlockedDecorations: pet.unlockedDecorations ?? [],
+    ownedDecorationIds,
+    equippedDecorationId
+  };
+}
+
 export function migrateStudyState(value: unknown): StudyState {
-  if (isVersionTwoStudyState(value)) return value;
+  if (isVersionTwoStudyState(value)) {
+    return {
+      ...value,
+      pet: normalizePet(value.pet)
+    };
+  }
   if (!isVersionOneStudyState(value)) return createDefaultState();
 
   const tasks = Object.fromEntries(Object.entries(value.tasks).map(([id, task]) => [id, migrateTask(task)]));
@@ -68,13 +91,13 @@ export function migrateStudyState(value: unknown): StudyState {
     version: 2,
     tasks,
     recurringTaskTemplates: {},
-    pet: {
+    pet: normalizePet({
       ...value.pet,
       experience: 0,
       experienceToNextLevel: 40,
       recentReward: "小猫在等第一个学习奖励",
       nextUnlock: "等级 2 解锁铃铛小猫"
-    }
+    })
   };
 }
 

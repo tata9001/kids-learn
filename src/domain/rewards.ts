@@ -1,5 +1,5 @@
 import type { PetState, StudyState } from "./types";
-import { getNextCatUnlock, MAX_CAT_LEVEL } from "./cats";
+import { getCatDecoration, getNextCatUnlock, MAX_CAT_LEVEL } from "./cats";
 
 const STREAK_UNLOCKS: Record<number, string> = {
   3: "kitten-bell",
@@ -45,6 +45,10 @@ function addPetExperience(pet: PetState, amount: number, recentReward: string): 
 
 function addCollection(pet: PetState, collectionId: string): string[] {
   return Array.from(new Set([...pet.unlockedDecorations, collectionId]));
+}
+
+function addOwnedDecoration(pet: PetState, decorationId: string): string[] {
+  return Array.from(new Set([...(pet.ownedDecorationIds ?? []), decorationId]));
 }
 
 export function grantFocusReward(state: StudyState, minutes: number): StudyState {
@@ -183,6 +187,54 @@ export function interactWithPet(state: StudyState, interaction: PetInteraction):
     pet: {
       ...pet,
       mood: "proud"
+    }
+  };
+}
+
+export function purchasePetDecoration(state: StudyState, decorationId: string): StudyState {
+  const decoration = getCatDecoration(decorationId);
+  if (!decoration) return state;
+  const ownedDecorationIds = state.pet.ownedDecorationIds ?? [];
+
+  if (ownedDecorationIds.includes(decorationId)) {
+    return equipPetDecoration(state, decorationId);
+  }
+
+  if (state.pet.careItems < decoration.cost) {
+    return {
+      ...state,
+      pet: {
+        ...state.pet,
+        recentReward: `还差 ${decoration.cost - state.pet.careItems} 个小鱼干才能兑换${decoration.name}`
+      }
+    };
+  }
+
+  return {
+    ...state,
+    pet: {
+      ...state.pet,
+      careItems: state.pet.careItems - decoration.cost,
+      ownedDecorationIds: addOwnedDecoration(state.pet, decorationId),
+      equippedDecorationId: decorationId,
+      unlockedDecorations: addCollection(state.pet, `decoration-${decorationId}`),
+      mood: "proud",
+      recentReward: `小猫穿上了${decoration.name}`
+    }
+  };
+}
+
+export function equipPetDecoration(state: StudyState, decorationId: string): StudyState {
+  const decoration = getCatDecoration(decorationId);
+  if (!decoration || !(state.pet.ownedDecorationIds ?? []).includes(decorationId)) return state;
+
+  return {
+    ...state,
+    pet: {
+      ...state.pet,
+      equippedDecorationId: decorationId,
+      mood: "happy",
+      recentReward: `小猫换上了${decoration.name}`
     }
   };
 }

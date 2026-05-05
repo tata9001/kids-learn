@@ -17,7 +17,7 @@ import {
   type NewTaskInput,
   type UpdateTaskInput
 } from "../domain/tasks";
-import { interactWithPet, type PetInteraction } from "../domain/rewards";
+import { equipPetDecoration, interactWithPet, purchasePetDecoration, type PetInteraction } from "../domain/rewards";
 import type { AppMode, Settings, StudyState } from "../domain/types";
 import { clearStudyState, loadStudyState, saveStudyState } from "../storage/localStore";
 
@@ -38,6 +38,8 @@ interface StudyActions {
   confirm(taskId: string, parentComment?: string): void;
   adjust(taskId: string): void;
   interactWithPet(interaction: PetInteraction): void;
+  purchasePetDecoration(decorationId: string): void;
+  equipPetDecoration(decorationId: string): void;
   copyUnfinished(fromDateKey: string): void;
   resetData(): void;
 }
@@ -108,6 +110,12 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
       },
       interactWithPet(interaction) {
         setState((current) => interactWithPet(current, interaction));
+      },
+      purchasePetDecoration(decorationId) {
+        setState((current) => purchasePetDecoration(current, decorationId));
+      },
+      equipPetDecoration(decorationId) {
+        setState((current) => equipPetDecoration(current, decorationId));
       },
       copyUnfinished(fromDateKey) {
         setState((current) => copyUnfinishedTasksToToday(current, fromDateKey));

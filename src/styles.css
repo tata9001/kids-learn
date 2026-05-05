@@ -587,6 +587,109 @@ textarea {
   z-index: 2;
 }
 
+.catWearable {
+  position: absolute;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.catWearable-pinkBow {
+  top: 7px;
+  left: 42px;
+  width: 46px;
+  height: 26px;
+  transform: rotate(-10deg);
+}
+
+.catWearable-pinkBow::before,
+.catWearable-pinkBow::after {
+  position: absolute;
+  top: 4px;
+  width: 22px;
+  height: 18px;
+  border: 3px solid #263238;
+  border-radius: 8px 50% 50% 8px;
+  background: #ff9fc5;
+  content: "";
+}
+
+.catWearable-pinkBow::before {
+  left: 0;
+  transform: rotate(22deg);
+}
+
+.catWearable-pinkBow::after {
+  right: 0;
+  transform: scaleX(-1) rotate(22deg);
+}
+
+.catWearable-bellCollar {
+  bottom: 52px;
+  left: 50%;
+  width: 64px;
+  height: 12px;
+  border: 3px solid #263238;
+  border-radius: 999px;
+  background: #7cc7d7;
+  transform: translateX(-50%);
+}
+
+.catWearable-bellCollar::after {
+  position: absolute;
+  left: 50%;
+  top: 6px;
+  width: 18px;
+  height: 18px;
+  border: 3px solid #263238;
+  border-radius: 50%;
+  background: #f4c84d;
+  content: "";
+  transform: translateX(-50%);
+}
+
+.catWearable-braveCape {
+  left: 30px;
+  bottom: 34px;
+  width: 94px;
+  height: 54px;
+  border-radius: 999px 999px 28px 28px;
+  background: rgba(239, 98, 98, 0.78);
+  transform: rotate(7deg);
+  z-index: 0;
+}
+
+.catWearable-moonCharm {
+  right: 39px;
+  bottom: 45px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fff7d8;
+  box-shadow: 7px -1px 0 #ffd36f;
+}
+
+.catWearable-laurelCrown {
+  top: 0;
+  left: 50%;
+  width: 62px;
+  height: 24px;
+  border: 3px solid #263238;
+  border-radius: 0 0 16px 16px;
+  background: #f4c84d;
+  transform: translateX(-50%);
+}
+
+.catWearable-laurelCrown::before {
+  position: absolute;
+  top: -10px;
+  left: 8px;
+  width: 10px;
+  height: 16px;
+  background: #f4c84d;
+  box-shadow: 18px -5px 0 #f4c84d, 36px 0 0 #f4c84d;
+  content: "";
+}
+
 .cat-bell .catAccessory {
   bottom: 53px;
   left: 50%;
@@ -927,6 +1030,88 @@ textarea {
   gap: 10px;
 }
 
+.decorationShop {
+  display: grid;
+  gap: 12px;
+  max-height: 30vh;
+  overflow: auto;
+  padding-top: 8px;
+}
+
+.decorationShop h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.decorationGrid {
+  display: grid;
+  gap: 10px;
+}
+
+.decorationCard {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  border: 1px solid #d6e5de;
+  border-radius: 8px;
+  background: #f8fbfa;
+  padding: 10px;
+}
+
+.decorationCard button {
+  grid-column: 1 / -1;
+  width: 100%;
+}
+
+.decorationCard h3,
+.decorationCard p {
+  margin: 0 0 4px;
+}
+
+.decorationCard h3 {
+  font-size: 1rem;
+}
+
+.decorationCard.isEquipped {
+  border-color: #226b5f;
+  background: #e5f1ed;
+}
+
+.decorationPreview {
+  position: relative;
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+}
+
+.decorationPreview::before {
+  color: #226b5f;
+  font-size: 1.4rem;
+  font-weight: 900;
+}
+
+.decorationPreview-pinkBow::before {
+  content: "结";
+}
+
+.decorationPreview-bellCollar::before {
+  content: "铃";
+}
+
+.decorationPreview-braveCape::before {
+  content: "披";
+}
+
+.decorationPreview-moonCharm::before {
+  content: "月";
+}
+
+.decorationPreview-laurelCrown::before {
+  content: "冠";
+}
+
 .taskCard {
   display: flex;
   align-items: center;
@@ -1265,7 +1450,14 @@ textarea {
   gap: 10px;
 }
 
-.collectionGrid span {
+.ownedDecorationRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.collectionGrid span,
+.ownedDecorationRow span {
   min-height: 42px;
   border: 1px solid #c9ddd4;
   border-radius: 8px;
@@ -1273,6 +1465,10 @@ textarea {
   padding: 10px 12px;
   color: #1f5b52;
   font-weight: 800;
+}
+
+.ownedDecorationRow .isLockedDecoration {
+  opacity: 0.62;
 }
 
 @keyframes catFloat {

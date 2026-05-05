@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { PetState } from "../domain/types";
-import { getCatStage } from "../domain/cats";
+import { CAT_DECORATIONS, getCatDecoration, getCatStage } from "../domain/cats";
 import { CatFigure } from "./CatCompanion";
 import { useStudyStore } from "../state/useStudyStore";
 
@@ -38,6 +38,7 @@ export function PetPanel({ pet }: { pet: PetState }) {
   const stage = getCatStage(pet.level);
   const decorations = pet.unlockedDecorations.length > 0 ? pet.unlockedDecorations.length : 0;
   const progress = Math.min(100, Math.round((pet.experience / pet.experienceToNextLevel) * 100));
+  const equippedDecoration = pet.equippedDecorationId ? getCatDecoration(pet.equippedDecorationId) : undefined;
 
   function handleInteraction(kind: "pet" | "feed" | "play") {
     playKittenSound();
@@ -49,7 +50,7 @@ export function PetPanel({ pet }: { pet: PetState }) {
     <>
       <section className={`petPanel mood-${pet.mood}`} aria-label="小猫伙伴">
         <button className="catFigureButton" aria-label="和小猫互动" onClick={() => setIsPlaying(true)}>
-          <CatFigure stage={stage} level={pet.level} />
+          <CatFigure stage={stage} level={pet.level} decorationId={pet.equippedDecorationId} />
         </button>
         <div className="catInfo">
           <p className="eyebrow">小猫伙伴 · 等级 {pet.level}</p>
@@ -62,6 +63,7 @@ export function PetPanel({ pet }: { pet: PetState }) {
             <span>连续 {pet.streakDays} 天</span>
             <span>小鱼干 {pet.careItems}</span>
             <span>收藏 {decorations}</span>
+            <span>装饰 {equippedDecoration?.name ?? "未穿戴"}</span>
           </div>
           <div className="xpTrack" aria-label={`经验 ${pet.experience}/${pet.experienceToNextLevel}`}>
             <span style={{ width: `${progress}%` }} />
@@ -86,7 +88,7 @@ export function PetPanel({ pet }: { pet: PetState }) {
           </button>
           <div className="playgroundCat">
             <button className="catFigureButton catFigureButton-large" aria-label="摸摸小猫身体" onClick={() => handleInteraction("pet")}>
-              <CatFigure stage={stage} level={pet.level} />
+              <CatFigure stage={stage} level={pet.level} decorationId={pet.equippedDecorationId} />
             </button>
             <div className="soundWave" aria-hidden="true">
               <span />
@@ -103,6 +105,7 @@ export function PetPanel({ pet }: { pet: PetState }) {
               <span>经验 {pet.experience}/{pet.experienceToNextLevel}</span>
               <span>小鱼干 {pet.careItems}</span>
               <span>收藏 {decorations}</span>
+              <span>装饰 {equippedDecoration?.name ?? "未穿戴"}</span>
             </div>
             <div className="playgroundActions">
               <button className="primaryButton" onClick={() => handleInteraction("pet")}>
@@ -116,6 +119,38 @@ export function PetPanel({ pet }: { pet: PetState }) {
               </button>
             </div>
             <p className="catReward">{pet.recentReward}</p>
+            <section className="decorationShop" aria-label="装饰小猫">
+              <h2>装饰小猫</h2>
+              <div className="decorationGrid">
+                {CAT_DECORATIONS.map((decoration) => {
+                  const owned = (pet.ownedDecorationIds ?? []).includes(decoration.id);
+                  const equipped = pet.equippedDecorationId === decoration.id;
+                  const label = owned
+                    ? equipped
+                      ? `已穿上 ${decoration.name}`
+                      : `穿上 ${decoration.name}`
+                    : `兑换 ${decoration.name}，${decoration.cost} 小鱼干`;
+
+                  return (
+                    <article key={decoration.id} className={`decorationCard ${equipped ? "isEquipped" : ""}`}>
+                      <div className={`decorationPreview decorationPreview-${decoration.className}`} aria-hidden="true" />
+                      <div>
+                        <h3>{decoration.name}</h3>
+                        <p>{decoration.description}</p>
+                        <p className="catNextGoal">{owned ? "已收藏" : `${decoration.cost} 小鱼干`}</p>
+                      </div>
+                      <button
+                        className="secondaryButton compactButton"
+                        disabled={equipped}
+                        onClick={() => (owned ? actions.equipPetDecoration(decoration.id) : actions.purchasePetDecoration(decoration.id))}
+                      >
+                        {label}
+                      </button>
+                    </article>
+                  );
+                })}
+              </div>
+            </section>
           </div>
         </section>
       )}

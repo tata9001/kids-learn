@@ -87,6 +87,8 @@ export interface PetState {
   mood: "calm" | "happy" | "proud";
   careItems: number;
   unlockedDecorations: string[];
+  ownedDecorationIds: string[];
+  equippedDecorationId?: string;
   streakDays: number;
   recentReward: string;
   nextUnlock: string;

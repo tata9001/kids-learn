@@ -43,6 +43,8 @@ export function createDefaultState(now = new Date()): StudyState {
       mood: "calm",
       careItems: 0,
       unlockedDecorations: [],
+      ownedDecorationIds: [],
+      equippedDecorationId: undefined,
       streakDays: 0,
       recentReward: "小猫在等第一个学习奖励",
       nextUnlock: "等级 2 解锁铃铛小猫"

@@ -7,6 +7,52 @@ export interface CatStage {
   className: string;
 }
 
+export interface CatDecoration {
+  id: string;
+  name: string;
+  description: string;
+  cost: number;
+  className: string;
+}
+
+export const CAT_DECORATIONS: CatDecoration[] = [
+  {
+    id: "pink-bow",
+    name: "粉色蝴蝶结",
+    description: "戴在耳边，像准备认真开始的小约定。",
+    cost: 2,
+    className: "pinkBow"
+  },
+  {
+    id: "bell-collar",
+    name: "小铃铛项圈",
+    description: "完成任务后轻轻响一下，提醒努力被看见。",
+    cost: 3,
+    className: "bellCollar"
+  },
+  {
+    id: "brave-cape",
+    name: "勇气披风",
+    description: "遇到难题时，陪孩子先试一小步。",
+    cost: 4,
+    className: "braveCape"
+  },
+  {
+    id: "moon-charm",
+    name: "月牙挂坠",
+    description: "适合一天收尾时看看今天完成了什么。",
+    cost: 5,
+    className: "moonCharm"
+  },
+  {
+    id: "laurel-crown",
+    name: "小桂冠",
+    description: "给长期坚持的孩子一份小小荣誉。",
+    cost: 6,
+    className: "laurelCrown"
+  }
+];
+
 export const CAT_STAGES: CatStage[] = [
   {
     level: 1,
@@ -138,9 +184,18 @@ const COLLECTION_LABELS: Record<string, string> = {
   "cloud-cat-bed": "7 天云朵猫窝",
   "star-whisker-badge": "14 天星光胡须章",
   "fed-kitten": "小鱼干喂养纪念",
-  "playtime-spark": "陪玩闪光纪念"
+  "playtime-spark": "陪玩闪光纪念",
+  "decoration-pink-bow": "粉色蝴蝶结",
+  "decoration-bell-collar": "小铃铛项圈",
+  "decoration-brave-cape": "勇气披风",
+  "decoration-moon-charm": "月牙挂坠",
+  "decoration-laurel-crown": "小桂冠"
 };
 
 export function getCollectionLabel(id: string): string {
   return COLLECTION_LABELS[id] ?? id;
+}
+
+export function getCatDecoration(id: string): CatDecoration | undefined {
+  return CAT_DECORATIONS.find((decoration) => decoration.id === id);
 }

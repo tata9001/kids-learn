@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { grantFocusReward, grantTaskReward, interactWithPet, updateDailyGoalReward } from "./rewards";
+import { equipPetDecoration, grantFocusReward, grantTaskReward, interactWithPet, purchasePetDecoration, updateDailyGoalReward } from "./rewards";
 import { testState, testTask } from "../test/testState";
 
 describe("rewards", () => {
@@ -84,5 +84,36 @@ describe("rewards", () => {
     expect(next.pet.level).toBe(2);
     expect(next.pet.unlockedDecorations).toContain("playtime-spark");
     expect(next.pet.recentReward).toContain("玩");
+  });
+
+  it("buys a kitten decoration with fish treats and equips it", () => {
+    const state = testState({
+      pet: { ...testState().pet, careItems: 3 }
+    });
+
+    const next = purchasePetDecoration(state, "pink-bow");
+
+    expect(next.pet.careItems).toBe(1);
+    expect(next.pet.ownedDecorationIds).toContain("pink-bow");
+    expect(next.pet.equippedDecorationId).toBe("pink-bow");
+    expect(next.pet.unlockedDecorations).toContain("decoration-pink-bow");
+    expect(next.pet.recentReward).toContain("粉色蝴蝶结");
+  });
+
+  it("switches to an owned kitten decoration without spending fish treats", () => {
+    const state = testState({
+      pet: {
+        ...testState().pet,
+        careItems: 2,
+        ownedDecorationIds: ["pink-bow", "moon-charm"],
+        equippedDecorationId: "pink-bow"
+      }
+    });
+
+    const next = equipPetDecoration(state, "moon-charm");
+
+    expect(next.pet.careItems).toBe(2);
+    expect(next.pet.equippedDecorationId).toBe("moon-charm");
+    expect(next.pet.recentReward).toContain("月牙");
   });
 });
