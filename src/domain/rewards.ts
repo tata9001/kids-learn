@@ -1,4 +1,5 @@
 import type { PetState, StudyState } from "./types";
+import { getNextCatUnlock, MAX_CAT_LEVEL } from "./cats";
 
 const STREAK_UNLOCKS: Record<number, string> = {
   3: "kitten-bell",
@@ -6,20 +7,15 @@ const STREAK_UNLOCKS: Record<number, string> = {
   14: "star-whisker-badge"
 };
 
-const LEVEL_UNLOCKS: Record<number, string> = {
-  2: "铃铛小猫",
-  3: "云朵小猫",
-  4: "星星小猫"
-};
+const MAX_ENERGY = 100;
+export type PetInteraction = "pet" | "feed" | "play";
 
 function experienceToNextLevel(level: number): number {
   return 40 + (level - 1) * 20;
 }
 
-function nextUnlock(level: number): string {
-  const nextLevel = level + 1;
-  const unlock = LEVEL_UNLOCKS[nextLevel];
-  return unlock ? `等级 ${nextLevel} 解锁${unlock}` : "继续升级，解锁更多小猫装饰";
+function clampEnergy(energy: number): number {
+  return Math.min(MAX_ENERGY, Math.max(0, energy));
 }
 
 function addPetExperience(pet: PetState, amount: number, recentReward: string): PetState {
@@ -27,10 +23,14 @@ function addPetExperience(pet: PetState, amount: number, recentReward: string): 
   let experience = pet.experience + amount;
   let threshold = pet.experienceToNextLevel;
 
-  while (experience >= threshold) {
+  while (experience >= threshold && level < MAX_CAT_LEVEL) {
     experience -= threshold;
     level += 1;
     threshold = experienceToNextLevel(level);
+  }
+
+  if (level >= MAX_CAT_LEVEL) {
+    experience = Math.min(experience, threshold);
   }
 
   return {
@@ -39,8 +39,12 @@ function addPetExperience(pet: PetState, amount: number, recentReward: string): 
     experience,
     experienceToNextLevel: threshold,
     recentReward,
-    nextUnlock: nextUnlock(level)
+    nextUnlock: getNextCatUnlock(level)
   };
+}
+
+function addCollection(pet: PetState, collectionId: string): string[] {
+  return Array.from(new Set([...pet.unlockedDecorations, collectionId]));
 }
 
 export function grantFocusReward(state: StudyState, minutes: number): StudyState {
@@ -50,7 +54,7 @@ export function grantFocusReward(state: StudyState, minutes: number): StudyState
     ...state,
     pet: {
       ...addPetExperience(state.pet, 10, "完成一个专注块，小猫获得 10 点经验"),
-      energy: state.pet.energy + 10,
+      energy: clampEnergy(state.pet.energy + 10),
       mood: "happy"
     },
     reviews: {
@@ -105,11 +109,8 @@ export function updateDailyGoalReward(state: StudyState, goalMet: boolean): Stud
     ...state,
     pet: {
       ...pet,
-      level: unlock && pet.level === state.pet.level ? pet.level + 1 : pet.level,
       streakDays: nextStreak,
-      unlockedDecorations: unlock
-        ? Array.from(new Set([...state.pet.unlockedDecorations, unlock]))
-        : state.pet.unlockedDecorations
+      unlockedDecorations: unlock ? addCollection(state.pet, unlock) : state.pet.unlockedDecorations
     },
     reviews: {
       ...state.reviews,
@@ -117,6 +118,71 @@ export function updateDailyGoalReward(state: StudyState, goalMet: boolean): Stud
         ...review,
         dailyGoalMet: true
       }
+    }
+  };
+}
+
+export function interactWithPet(state: StudyState, interaction: PetInteraction): StudyState {
+  if (interaction === "pet") {
+    return {
+      ...state,
+      pet: {
+        ...state.pet,
+        mood: "happy",
+        recentReward: "喵，小猫蹭了蹭你"
+      }
+    };
+  }
+
+  if (interaction === "feed") {
+    if (state.pet.careItems <= 0) {
+      return {
+        ...state,
+        pet: {
+          ...state.pet,
+          recentReward: "小鱼干不够，完成任务后就能再喂小猫"
+        }
+      };
+    }
+
+    return {
+      ...state,
+      pet: {
+        ...state.pet,
+        careItems: state.pet.careItems - 1,
+        energy: clampEnergy(state.pet.energy + 8),
+        mood: "happy",
+        unlockedDecorations: addCollection(state.pet, "fed-kitten"),
+        recentReward: "小猫吃到小鱼干，今天更有精神了"
+      }
+    };
+  }
+
+  if (state.pet.energy < 10) {
+    return {
+      ...state,
+      pet: {
+        ...state.pet,
+        recentReward: "小猫想先补充一点能量，再一起玩"
+      }
+    };
+  }
+
+  const pet = addPetExperience(
+    {
+      ...state.pet,
+      energy: clampEnergy(state.pet.energy - 10),
+      unlockedDecorations: addCollection(state.pet, "playtime-spark")
+    },
+    5,
+    "你陪小猫玩了一会儿，小猫获得 5 点经验"
+  );
+
+  return {
+    ...state,
+    pet: {
+      ...pet,
+      mood: "proud"
     }
   };
 }

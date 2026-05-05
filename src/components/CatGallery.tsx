@@ -1,11 +1,12 @@
 import type { PetState } from "../domain/types";
-import { CAT_STAGES, CatFigure } from "./CatCompanion";
+import { CAT_STAGES, getCollectionLabel } from "../domain/cats";
+import { CatFigure } from "./CatCompanion";
 
 const STAT_GUIDE = [
   {
     name: "能量",
     meaning: "表示小猫今天的活力。完成专注块会增加能量，让孩子直观看到努力有反馈。",
-    use: "用于提醒今天已经进入学习状态，后续可以扩展为换装或休息互动消耗。"
+    use: "喂小鱼干可以恢复能量，陪小猫玩会消耗能量并换成经验。"
   },
   {
     name: "经验",
@@ -20,12 +21,12 @@ const STAT_GUIDE = [
   {
     name: "小鱼干",
     meaning: "完成任务后获得的照顾道具，像给小猫的小奖励。",
-    use: "用于展示孩子完成了多少个可确认成果，后续可以作为喂养和装饰兑换资源。"
+    use: "在小猫互动里可以喂给小猫，留下喂养纪念，也让能量更充足。"
   },
   {
     name: "收藏",
     meaning: "已经解锁的小猫装饰和成长纪念。",
-    use: "用于沉淀长期成就，让孩子看到自己不是只完成今天，而是在持续积累。"
+    use: "连续达标、喂养、陪玩都会留下纪念，让孩子看到长期积累。"
   }
 ];
 
@@ -78,6 +79,19 @@ export function CatGallery({ pet }: { pet: PetState }) {
             </article>
           ))}
         </div>
+      </section>
+
+      <section className="collectionShelf" aria-label="小猫收藏">
+        <h2>已经收藏</h2>
+        {pet.unlockedDecorations.length > 0 ? (
+          <div className="collectionGrid">
+            {pet.unlockedDecorations.map((collectionId) => (
+              <span key={collectionId}>{getCollectionLabel(collectionId)}</span>
+            ))}
+          </div>
+        ) : (
+          <p className="emptyHint">还没有收藏。连续达标、喂小鱼干、陪小猫玩都会留下成长纪念。</p>
+        )}
       </section>
     </section>
   );

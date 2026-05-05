@@ -117,6 +117,29 @@ textarea {
   overflow: hidden;
 }
 
+.catFigureButton {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  padding: 0;
+  color: inherit;
+  cursor: pointer;
+}
+
+.catFigureButton:focus-visible {
+  outline: 4px solid rgba(34, 107, 95, 0.3);
+  outline-offset: 4px;
+}
+
+.petActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
 .catAvatar {
   position: relative;
   display: flex;
@@ -310,6 +333,17 @@ textarea {
 .catFigure-small {
   width: 132px;
   height: 124px;
+}
+
+.catFigureButton-large {
+  width: min(58vw, 330px);
+  height: min(50vh, 300px);
+}
+
+.catFigureButton-large .catFigure {
+  width: 164px;
+  height: 156px;
+  scale: 1.9;
 }
 
 .catShadow {
@@ -608,6 +642,192 @@ textarea {
   filter: drop-shadow(0 2px 0 #263238);
 }
 
+.cat-paint .catBody,
+.cat-paint .catHead {
+  background: #ffc0cb;
+}
+
+.cat-paint .catAccessory,
+.cat-detective .catAccessory,
+.cat-space .catAccessory,
+.cat-garden .catAccessory,
+.cat-wave .catAccessory,
+.cat-book .catAccessory,
+.cat-rainbow .catAccessory,
+.cat-moon .catAccessory,
+.cat-brave .catAccessory,
+.cat-champion .catAccessory {
+  display: grid;
+  place-items: center;
+  color: #263238;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.cat-paint .catAccessory {
+  top: 12px;
+  left: 23px;
+  width: 38px;
+  height: 10px;
+  border: 2px solid #263238;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #226b5f 0 65%, #f4c84d 65% 100%);
+  transform: rotate(-22deg);
+}
+
+.cat-detective .catBody,
+.cat-detective .catHead {
+  background: #d8c0a8;
+}
+
+.cat-detective .catAccessory {
+  bottom: 55px;
+  left: 50%;
+  width: 34px;
+  height: 18px;
+  border: 3px solid #263238;
+  border-radius: 50%;
+  background: #30515f;
+  transform: translateX(-50%);
+}
+
+.cat-space .catBody,
+.cat-space .catHead {
+  background: #b6d7ff;
+}
+
+.cat-space .catAccessory {
+  top: 2px;
+  right: 20px;
+  width: 34px;
+  height: 34px;
+  border: 3px solid #263238;
+  border-radius: 50%;
+  background: #a78bfa;
+  box-shadow: -5px 8px 0 #f4c84d;
+}
+
+.cat-garden .catBody,
+.cat-garden .catHead {
+  background: #bde7c2;
+}
+
+.cat-garden .catAccessory {
+  top: 5px;
+  left: 28px;
+  width: 28px;
+  height: 18px;
+  border-radius: 999px 999px 0 999px;
+  background: #5fa86a;
+  transform: rotate(-25deg);
+}
+
+.cat-wave .catBody,
+.cat-wave .catHead,
+.cat-wave .catTail {
+  background: #9bdbe8;
+  border-color: #24445a;
+}
+
+.cat-wave .catAccessory {
+  bottom: 19px;
+  right: 18px;
+  width: 42px;
+  height: 18px;
+  border: 3px solid #24445a;
+  border-top: 0;
+  border-radius: 0 0 999px 999px;
+}
+
+.cat-book .catBody,
+.cat-book .catHead {
+  background: #f6d28b;
+}
+
+.cat-book .catAccessory {
+  right: 25px;
+  bottom: 23px;
+  width: 34px;
+  height: 26px;
+  border: 3px solid #263238;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #ffffff 0 48%, #cfeeff 48% 52%, #ffffff 52% 100%);
+}
+
+.cat-rainbow .catBody,
+.cat-rainbow .catHead {
+  background: #fbcfe8;
+}
+
+.cat-rainbow .catAccessory {
+  top: 2px;
+  left: 24px;
+  width: 56px;
+  height: 28px;
+  border: 5px solid #ef6262;
+  border-bottom: 0;
+  border-radius: 999px 999px 0 0;
+  box-shadow: inset 0 5px 0 #f4c84d, inset 0 10px 0 #5fa86a, inset 0 15px 0 #5ba4cf;
+}
+
+.cat-moon .catBody,
+.cat-moon .catHead {
+  background: #d6d8ff;
+}
+
+.cat-moon .catAccessory {
+  top: 16px;
+  right: 35px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #fff7d8;
+  box-shadow: 8px -1px 0 #d6d8ff;
+}
+
+.cat-brave .catBody,
+.cat-brave .catHead {
+  background: #ffb4a2;
+}
+
+.cat-brave .catAccessory {
+  left: 27px;
+  bottom: 32px;
+  width: 78px;
+  height: 42px;
+  border-radius: 999px 999px 24px 24px;
+  background: rgba(34, 107, 95, 0.75);
+  transform: rotate(8deg);
+  z-index: 0;
+}
+
+.cat-champion .catBody,
+.cat-champion .catHead {
+  background: #ffe27a;
+}
+
+.cat-champion .catAccessory {
+  top: 0;
+  left: 50%;
+  width: 56px;
+  height: 24px;
+  border: 3px solid #263238;
+  border-radius: 0 0 16px 16px;
+  background: #f4c84d;
+  transform: translateX(-50%);
+}
+
+.cat-champion .catAccessory::before {
+  content: "";
+  position: absolute;
+  top: -10px;
+  left: 7px;
+  width: 10px;
+  height: 16px;
+  background: #f4c84d;
+  box-shadow: 16px -4px 0 #f4c84d, 32px 0 0 #f4c84d;
+}
+
 .mood-happy .catAvatar {
   transform: rotate(-2deg);
 }
@@ -622,6 +842,89 @@ textarea {
 
 .mood-proud .catFigure {
   animation-name: catProud;
+}
+
+.petPlayground {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) minmax(280px, 420px);
+  gap: 28px;
+  align-items: center;
+  padding: clamp(20px, 4vw, 56px);
+  background:
+    radial-gradient(circle at 20% 20%, rgba(255, 247, 216, 0.9), transparent 34%),
+    linear-gradient(135deg, #e5f1ed 0%, #fff7d8 54%, #eaf5ff 100%);
+}
+
+.playgroundClose {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  display: grid;
+  width: 48px;
+  min-width: 48px;
+  height: 48px;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: #263238;
+  color: #fff;
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.playgroundCat {
+  position: relative;
+  display: grid;
+  min-height: 420px;
+  place-items: center;
+}
+
+.soundWave {
+  position: absolute;
+  right: 16%;
+  top: 22%;
+  display: flex;
+  gap: 8px;
+}
+
+.soundWave span {
+  display: block;
+  width: 12px;
+  height: 44px;
+  border-radius: 999px;
+  background: rgba(34, 107, 95, 0.45);
+  animation: soundBounce 0.9s ease-in-out infinite;
+}
+
+.soundWave span:nth-child(2) {
+  animation-delay: 0.12s;
+}
+
+.soundWave span:nth-child(3) {
+  animation-delay: 0.24s;
+}
+
+.playgroundPanel {
+  display: grid;
+  gap: 14px;
+  border: 1px solid #d6e5de;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.94);
+  padding: 22px;
+  box-shadow: 0 18px 45px rgba(38, 50, 56, 0.14);
+}
+
+.playgroundPanel h2,
+.playgroundPanel p {
+  margin: 0;
+}
+
+.playgroundActions {
+  display: grid;
+  gap: 10px;
 }
 
 .taskCard {
@@ -947,6 +1250,31 @@ textarea {
   font-size: 1.2rem;
 }
 
+.collectionShelf {
+  display: grid;
+  gap: 14px;
+}
+
+.collectionShelf h2 {
+  margin: 0;
+}
+
+.collectionGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.collectionGrid span {
+  min-height: 42px;
+  border: 1px solid #c9ddd4;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 10px 12px;
+  color: #1f5b52;
+  font-weight: 800;
+}
+
 @keyframes catFloat {
   0%,
   100% {
@@ -1000,10 +1328,23 @@ textarea {
   }
 }
 
+@keyframes soundBounce {
+  0%,
+  100% {
+    transform: scaleY(0.45);
+    opacity: 0.45;
+  }
+  50% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .catFigure,
   .catShadow,
   .catTail,
+  .soundWave span,
   .catFigure .catEye {
     animation: none;
   }
@@ -1016,5 +1357,14 @@ textarea {
   .catStageGrid,
   .statGuideGrid {
     grid-template-columns: 1fr;
+  }
+
+  .petPlayground {
+    grid-template-columns: 1fr;
+    overflow-y: auto;
+  }
+
+  .playgroundCat {
+    min-height: 300px;
   }
 }

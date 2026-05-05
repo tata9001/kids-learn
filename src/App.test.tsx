@@ -116,6 +116,7 @@ it("lets children add completion details and parents confirm with a comment", as
 
 it("generates matching weekly recurring tasks and shows pet progress", async () => {
   const state = createDefaultState(new Date("2026-05-01T08:00:00+08:00"));
+  const currentWeekday = new Date().getDay();
   localStorage.setItem(
     STORAGE_KEY,
     JSON.stringify({
@@ -129,7 +130,7 @@ it("generates matching weekly recurring tasks and shows pet progress", async () 
           completionStandard: "整理书桌",
           requiresConfirmation: false,
           recurrence: "weekly",
-          weekdays: [6],
+          weekdays: [currentWeekday],
           paused: false,
           createdAt: "2026-05-01T08:00:00+08:00",
           generatedDateKeys: []
@@ -163,9 +164,28 @@ it("shows a kitten gallery with growth stages and stat meanings", async () => {
   expect(screen.getByText("铃铛小猫")).toBeInTheDocument();
   expect(screen.getByText("云朵小猫")).toBeInTheDocument();
   expect(screen.getByText("星星小猫")).toBeInTheDocument();
+  expect(screen.getByText("冠军小猫")).toBeInTheDocument();
+  expect(screen.getAllByText(/等级 \d+/)).toHaveLength(14);
   expect(screen.getByText("能量")).toBeInTheDocument();
   expect(screen.getByText("经验")).toBeInTheDocument();
   expect(screen.getByText("连续")).toBeInTheDocument();
   expect(screen.getByText("小鱼干")).toBeInTheDocument();
   expect(screen.getByText("收藏")).toBeInTheDocument();
+});
+
+it("opens a fullscreen kitten interaction panel from the kitten", async () => {
+  const user = userEvent.setup();
+  renderApp();
+
+  await user.click(screen.getByRole("button", { name: "孩子模式" }));
+  await user.click(screen.getByRole("button", { name: "和小猫互动" }));
+
+  expect(screen.getByRole("dialog", { name: "小猫互动" })).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "摸摸小猫" })).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "喂小鱼干" })).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "陪它玩一会儿" })).toBeInTheDocument();
+
+  await user.click(screen.getByRole("button", { name: "摸摸小猫" }));
+
+  expect(screen.getAllByText(/喵/).length).toBeGreaterThan(0);
 });

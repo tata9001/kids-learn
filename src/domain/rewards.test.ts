@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { grantFocusReward, grantTaskReward, updateDailyGoalReward } from "./rewards";
+import { grantFocusReward, grantTaskReward, interactWithPet, updateDailyGoalReward } from "./rewards";
 import { testState, testTask } from "../test/testState";
 
 describe("rewards", () => {
@@ -57,5 +57,32 @@ describe("rewards", () => {
     expect(next.pet.unlockedDecorations).toContain("kitten-bell");
     expect(next.pet.experience).toBe(15);
     expect(next.pet.recentReward).toContain("连续");
+  });
+
+  it("uses fish treats to feed the kitten and save a collection memory", () => {
+    const state = testState({
+      pet: { ...testState().pet, careItems: 2, energy: 40 }
+    });
+
+    const next = interactWithPet(state, "feed");
+
+    expect(next.pet.careItems).toBe(1);
+    expect(next.pet.energy).toBe(48);
+    expect(next.pet.unlockedDecorations).toContain("fed-kitten");
+    expect(next.pet.recentReward).toContain("小鱼干");
+  });
+
+  it("spends energy on play and turns it into kitten experience", () => {
+    const state = testState({
+      pet: { ...testState().pet, energy: 40, experience: 38 }
+    });
+
+    const next = interactWithPet(state, "play");
+
+    expect(next.pet.energy).toBe(30);
+    expect(next.pet.experience).toBe(3);
+    expect(next.pet.level).toBe(2);
+    expect(next.pet.unlockedDecorations).toContain("playtime-spark");
+    expect(next.pet.recentReward).toContain("玩");
   });
 });
