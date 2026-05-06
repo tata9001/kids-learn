@@ -2,34 +2,8 @@ import { useState } from "react";
 import type { PetState } from "../domain/types";
 import { CAT_DECORATIONS, getCatDecoration, getCatStage } from "../domain/cats";
 import { CatFigure } from "./CatCompanion";
+import { playKittenSound, type KittenSoundKind } from "./petSounds";
 import { useStudyStore } from "../state/useStudyStore";
-
-type WindowWithAudio = Window &
-  typeof globalThis & {
-    webkitAudioContext?: typeof AudioContext;
-  };
-
-function playKittenSound() {
-  const AudioCtor = window.AudioContext ?? (window as WindowWithAudio).webkitAudioContext;
-  if (!AudioCtor) return;
-
-  const context = new AudioCtor();
-  const oscillator = context.createOscillator();
-  const gain = context.createGain();
-
-  oscillator.type = "sine";
-  oscillator.frequency.setValueAtTime(520, context.currentTime);
-  oscillator.frequency.exponentialRampToValueAtTime(780, context.currentTime + 0.08);
-  oscillator.frequency.exponentialRampToValueAtTime(430, context.currentTime + 0.24);
-  gain.gain.setValueAtTime(0.0001, context.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.18, context.currentTime + 0.03);
-  gain.gain.exponentialRampToValueAtTime(0.0001, context.currentTime + 0.32);
-
-  oscillator.connect(gain);
-  gain.connect(context.destination);
-  oscillator.start();
-  oscillator.stop(context.currentTime + 0.34);
-}
 
 export function PetPanel({ pet }: { pet: PetState }) {
   const { actions } = useStudyStore();
@@ -41,9 +15,15 @@ export function PetPanel({ pet }: { pet: PetState }) {
   const equippedDecoration = pet.equippedDecorationId ? getCatDecoration(pet.equippedDecorationId) : undefined;
 
   function handleInteraction(kind: "pet" | "feed" | "play") {
-    playKittenSound();
+    playKittenSound(kind);
     actions.interactWithPet(kind);
     setSoundMessage(kind === "pet" ? "喵，小猫听见你了" : kind === "feed" ? "小猫开心地吃下小鱼干" : "小猫绕着你跳了一圈");
+  }
+
+  function handleDecorationAction(action: () => void, sound: KittenSoundKind, message: string) {
+    playKittenSound(sound);
+    action();
+    setSoundMessage(message);
   }
 
   return (
@@ -121,6 +101,14 @@ export function PetPanel({ pet }: { pet: PetState }) {
             <p className="catReward">{pet.recentReward}</p>
             <section className="decorationShop" aria-label="装饰小猫">
               <h2>装饰小猫</h2>
+              {pet.equippedDecorationId && (
+                <button
+                  className="secondaryButton compactButton"
+                  onClick={() => handleDecorationAction(actions.removePetDecoration, "undress", "小猫把装饰收进收藏盒了")}
+                >
+                  取下当前装饰
+                </button>
+              )}
               <div className="decorationGrid">
                 {CAT_DECORATIONS.map((decoration) => {
                   const owned = (pet.ownedDecorationIds ?? []).includes(decoration.id);
@@ -142,7 +130,13 @@ export function PetPanel({ pet }: { pet: PetState }) {
                       <button
                         className="secondaryButton compactButton"
                         disabled={equipped}
-                        onClick={() => (owned ? actions.equipPetDecoration(decoration.id) : actions.purchasePetDecoration(decoration.id))}
+                        onClick={() =>
+                          handleDecorationAction(
+                            () => (owned ? actions.equipPetDecoration(decoration.id) : actions.purchasePetDecoration(decoration.id)),
+                            "dress",
+                            owned ? `小猫换上了${decoration.name}` : `小猫试戴了${decoration.name}`
+                          )
+                        }
                       >
                         {label}
                       </button>

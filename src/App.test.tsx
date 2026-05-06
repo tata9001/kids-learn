@@ -216,4 +216,9 @@ it("lets children buy and wear kitten decorations in the interaction panel", asy
   expect(screen.getByText(/已穿上/)).toBeInTheDocument();
   expect(screen.getAllByText(/小鱼干 1/).length).toBeGreaterThan(0);
   expect(screen.getAllByText(/粉色蝴蝶结/).length).toBeGreaterThan(0);
+
+  await user.click(screen.getByRole("button", { name: "取下当前装饰" }));
+
+  expect(screen.getAllByText(/未穿戴/).length).toBeGreaterThan(0);
+  expect(screen.getByRole("button", { name: "穿上 粉色蝴蝶结" })).toBeInTheDocument();
 });

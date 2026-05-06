@@ -238,3 +238,17 @@ export function equipPetDecoration(state: StudyState, decorationId: string): Stu
     }
   };
 }
+
+export function removePetDecoration(state: StudyState): StudyState {
+  if (!state.pet.equippedDecorationId) return state;
+
+  return {
+    ...state,
+    pet: {
+      ...state.pet,
+      equippedDecorationId: undefined,
+      mood: "calm",
+      recentReward: "小猫把装饰收好了，想换时还能再穿上"
+    }
+  };
+}

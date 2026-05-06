@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { equipPetDecoration, grantFocusReward, grantTaskReward, interactWithPet, purchasePetDecoration, updateDailyGoalReward } from "./rewards";
+import {
+  equipPetDecoration,
+  grantFocusReward,
+  grantTaskReward,
+  interactWithPet,
+  purchasePetDecoration,
+  removePetDecoration,
+  updateDailyGoalReward
+} from "./rewards";
 import { testState, testTask } from "../test/testState";
 
 describe("rewards", () => {
@@ -115,5 +123,21 @@ describe("rewards", () => {
     expect(next.pet.careItems).toBe(2);
     expect(next.pet.equippedDecorationId).toBe("moon-charm");
     expect(next.pet.recentReward).toContain("月牙");
+  });
+
+  it("removes the currently worn kitten decoration while keeping it owned", () => {
+    const state = testState({
+      pet: {
+        ...testState().pet,
+        ownedDecorationIds: ["pink-bow"],
+        equippedDecorationId: "pink-bow"
+      }
+    });
+
+    const next = removePetDecoration(state);
+
+    expect(next.pet.ownedDecorationIds).toContain("pink-bow");
+    expect(next.pet.equippedDecorationId).toBeUndefined();
+    expect(next.pet.recentReward).toContain("收好");
   });
 });
