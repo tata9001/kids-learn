@@ -1,9 +1,10 @@
 import { useEffect, useState, type FormEvent } from "react";
 import type { PetState } from "../domain/types";
 import { CAT_DECORATIONS, getCatDecoration, getCatStage } from "../domain/cats";
-import { getPetDisplayName } from "../domain/petSpeech";
+import { buildPetSpeech, getPetDisplayName } from "../domain/petSpeech";
 import { CatFigure } from "./CatCompanion";
 import { playKittenSound, type KittenSoundKind } from "./petSounds";
+import { speakKittenLine } from "./petVoice";
 import { useStudyStore } from "../state/useStudyStore";
 
 export function PetPanel({ pet }: { pet: PetState }) {
@@ -35,8 +36,10 @@ export function PetPanel({ pet }: { pet: PetState }) {
   }
 
   function handleSpeak() {
+    const line = buildPetSpeech(pet, "manual", new Date().toISOString()).text;
     playKittenSound("speak");
     actions.makePetSpeak("manual");
+    speakKittenLine(line);
   }
 
   function handleRename(event: FormEvent<HTMLFormElement>) {

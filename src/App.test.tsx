@@ -1,10 +1,23 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { App } from "./App";
 import { StudyProvider } from "./state/useStudyStore";
 import { createDefaultState } from "./domain/defaultState";
 import { STORAGE_KEY } from "./storage/localStore";
+
+class MockSpeechSynthesisUtterance {
+  lang = "";
+  pitch = 1;
+  rate = 1;
+  text: string;
+  voice: SpeechSynthesisVoice | null = null;
+  volume = 1;
+
+  constructor(text: string) {
+    this.text = text;
+  }
+}
 
 function renderApp() {
   return render(
@@ -16,6 +29,14 @@ function renderApp() {
 
 beforeEach(() => {
   localStorage.clear();
+  Object.defineProperty(window, "speechSynthesis", {
+    configurable: true,
+    value: undefined
+  });
+  Object.defineProperty(window, "SpeechSynthesisUtterance", {
+    configurable: true,
+    value: undefined
+  });
 });
 
 describe("App shell", () => {
@@ -210,6 +231,31 @@ it("lets children name the kitten and hear a local coach line", async () => {
   view.unmount();
   renderApp();
   expect(screen.getByRole("heading", { name: "豆豆 · 奶糖小猫" })).toBeInTheDocument();
+});
+
+it("speaks kitten lines with local browser voice when asked", async () => {
+  const speak = vi.fn();
+  const cancel = vi.fn();
+  Object.defineProperty(window, "speechSynthesis", {
+    configurable: true,
+    value: { cancel, speak }
+  });
+  Object.defineProperty(window, "SpeechSynthesisUtterance", {
+    configurable: true,
+    value: MockSpeechSynthesisUtterance
+  });
+  const user = userEvent.setup();
+  renderApp();
+
+  await user.click(screen.getByRole("button", { name: "孩子模式" }));
+  await user.click(screen.getByRole("button", { name: "小猫说一句" }));
+
+  expect(cancel).toHaveBeenCalledTimes(1);
+  expect(speak).toHaveBeenCalledTimes(1);
+  expect(speak.mock.calls[0][0]).toMatchObject({
+    text: "小奶糖想说：我们先做最小的一步，好不好？",
+    lang: "zh-CN"
+  });
 });
 
 it("lets children return the kitten to its default name", async () => {
