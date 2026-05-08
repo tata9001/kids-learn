@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import type { PetState } from "../domain/types";
 import { CAT_DECORATIONS, getCatDecoration, getCatStage } from "../domain/cats";
+import { getPetDisplayName } from "../domain/petSpeech";
 import { CatFigure } from "./CatCompanion";
 import { playKittenSound, type KittenSoundKind } from "./petSounds";
 import { useStudyStore } from "../state/useStudyStore";
@@ -8,11 +9,18 @@ import { useStudyStore } from "../state/useStudyStore";
 export function PetPanel({ pet }: { pet: PetState }) {
   const { actions } = useStudyStore();
   const [isPlaying, setIsPlaying] = useState(false);
+  const [draftName, setDraftName] = useState(getPetDisplayName(pet));
   const [soundMessage, setSoundMessage] = useState("点一下小猫，它会回应你");
   const stage = getCatStage(pet.level);
+  const petName = getPetDisplayName(pet);
+  const speechLine = pet.speech?.text ?? soundMessage;
   const decorations = pet.unlockedDecorations.length > 0 ? pet.unlockedDecorations.length : 0;
   const progress = Math.min(100, Math.round((pet.experience / pet.experienceToNextLevel) * 100));
   const equippedDecoration = pet.equippedDecorationId ? getCatDecoration(pet.equippedDecorationId) : undefined;
+
+  useEffect(() => {
+    if (isPlaying) setDraftName(petName);
+  }, [isPlaying, petName]);
 
   function handleInteraction(kind: "pet" | "feed" | "play") {
     playKittenSound(kind);
@@ -26,6 +34,17 @@ export function PetPanel({ pet }: { pet: PetState }) {
     setSoundMessage(message);
   }
 
+  function handleSpeak() {
+    playKittenSound("speak");
+    actions.makePetSpeak("manual");
+  }
+
+  function handleRename(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    playKittenSound("speak");
+    actions.renamePet(draftName);
+  }
+
   return (
     <>
       <section className={`petPanel mood-${pet.mood}`} aria-label="小猫伙伴">
@@ -34,8 +53,9 @@ export function PetPanel({ pet }: { pet: PetState }) {
         </button>
         <div className="catInfo">
           <p className="eyebrow">小猫伙伴 · 等级 {pet.level}</p>
-          <h2>{stage.title}</h2>
+          <h2>{petName} · {stage.title}</h2>
           <p>{stage.form}</p>
+          <p className="petSpeechBubble">{pet.speech?.text ?? `${petName}在等你开始今天的小挑战。`}</p>
           <p className="catSkill">{stage.skill}</p>
           <div className="catStats" aria-label="小猫成长数据">
             <span>能量 {pet.energy}</span>
@@ -53,6 +73,9 @@ export function PetPanel({ pet }: { pet: PetState }) {
           <div className="petActions">
             <button className="secondaryButton compactButton" aria-label="打开小猫互动面板" onClick={() => setIsPlaying(true)}>
               和小猫互动
+            </button>
+            <button className="secondaryButton compactButton" onClick={handleSpeak}>
+              小猫说一句
             </button>
             <button className="secondaryButton compactButton" onClick={() => actions.setMode("cats")}>
               查看小猫图鉴
@@ -78,8 +101,33 @@ export function PetPanel({ pet }: { pet: PetState }) {
           </div>
           <div className="playgroundPanel">
             <p className="eyebrow">全屏互动 · 等级 {pet.level}</p>
-            <h2>{stage.title}</h2>
-            <p>{soundMessage}</p>
+            <h2>{petName} · {stage.title}</h2>
+            <p className="petSpeechBubble">{speechLine}</p>
+            <form className="petNameForm" onSubmit={handleRename}>
+              <label htmlFor="pet-name-input">小猫名字</label>
+              <div>
+                <input
+                  id="pet-name-input"
+                  value={draftName}
+                  maxLength={16}
+                  onChange={(event) => setDraftName(event.target.value)}
+                />
+                <button className="secondaryButton compactButton" type="submit">
+                  保存小猫名字
+                </button>
+                <button
+                  className="secondaryButton compactButton"
+                  type="button"
+                  onClick={() => {
+                    playKittenSound("speak");
+                    actions.clearPetName();
+                    setDraftName("小奶糖");
+                  }}
+                >
+                  恢复默认名字
+                </button>
+              </div>
+            </form>
             <div className="catStats" aria-label="互动数据">
               <span>能量 {pet.energy}</span>
               <span>经验 {pet.experience}/{pet.experienceToNextLevel}</span>
@@ -96,6 +144,9 @@ export function PetPanel({ pet }: { pet: PetState }) {
               </button>
               <button className="primaryButton" onClick={() => handleInteraction("play")}>
                 陪它玩一会儿
+              </button>
+              <button className="primaryButton" onClick={handleSpeak}>
+                小猫说一句
               </button>
             </div>
             <p className="catReward">{pet.recentReward}</p>

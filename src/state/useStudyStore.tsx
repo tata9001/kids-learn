@@ -4,6 +4,7 @@ import { createDefaultState } from "../domain/defaultState";
 import { completeFocusSession, recordInterruption, startFocusSession } from "../domain/focus";
 import { createRecurringTaskTemplate, pauseRecurringTaskTemplate, type NewRecurringTaskInput } from "../domain/recurrence";
 import { refreshDailyReview } from "../domain/review";
+import { clearPetName, makePetSpeak, renamePet, type PetSpeechTrigger } from "../domain/petSpeech";
 import {
   addTask,
   archiveTask,
@@ -41,6 +42,9 @@ interface StudyActions {
   purchasePetDecoration(decorationId: string): void;
   equipPetDecoration(decorationId: string): void;
   removePetDecoration(): void;
+  renamePet(name: string): void;
+  clearPetName(): void;
+  makePetSpeak(trigger: PetSpeechTrigger): void;
   copyUnfinished(fromDateKey: string): void;
   resetData(): void;
 }
@@ -120,6 +124,15 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
       },
       removePetDecoration() {
         setState((current) => removePetDecoration(current));
+      },
+      renamePet(name) {
+        setState((current) => renamePet(current, name));
+      },
+      clearPetName() {
+        setState((current) => clearPetName(current));
+      },
+      makePetSpeak(trigger) {
+        setState((current) => makePetSpeak(current, trigger));
       },
       copyUnfinished(fromDateKey) {
         setState((current) => copyUnfinishedTasksToToday(current, fromDateKey));

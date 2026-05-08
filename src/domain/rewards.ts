@@ -1,5 +1,6 @@
 import type { PetState, StudyState } from "./types";
 import { getCatDecoration, getNextCatUnlock, MAX_CAT_LEVEL } from "./cats";
+import { makePetSpeak } from "./petSpeech";
 
 const STREAK_UNLOCKS: Record<number, string> = {
   3: "kitten-bell",
@@ -54,7 +55,7 @@ function addOwnedDecoration(pet: PetState, decorationId: string): string[] {
 export function grantFocusReward(state: StudyState, minutes: number): StudyState {
   const review = state.reviews[state.todayKey];
 
-  return {
+  return makePetSpeak({
     ...state,
     pet: {
       ...addPetExperience(state.pet, 10, "完成一个专注块，小猫获得 10 点经验"),
@@ -68,7 +69,7 @@ export function grantFocusReward(state: StudyState, minutes: number): StudyState
         focusMinutes: review.focusMinutes + minutes
       }
     }
-  };
+  }, "focus");
 }
 
 export function grantTaskReward(state: StudyState, taskId: string): StudyState {
@@ -77,7 +78,7 @@ export function grantTaskReward(state: StudyState, taskId: string): StudyState {
   const review = state.reviews[task.dateKey];
   if (task.rewardGranted) return state;
 
-  return {
+  return makePetSpeak({
     ...state,
     tasks: {
       ...state.tasks,
@@ -98,7 +99,7 @@ export function grantTaskReward(state: StudyState, taskId: string): StudyState {
         completedTaskIds: Array.from(new Set([...review.completedTaskIds, taskId]))
       }
     }
-  };
+  }, "task");
 }
 
 export function updateDailyGoalReward(state: StudyState, goalMet: boolean): StudyState {
@@ -109,7 +110,7 @@ export function updateDailyGoalReward(state: StudyState, goalMet: boolean): Stud
   const unlock = STREAK_UNLOCKS[nextStreak];
   const pet = addPetExperience(state.pet, 15, "连续完成每日目标，小猫获得 15 点经验");
 
-  return {
+  return makePetSpeak({
     ...state,
     pet: {
       ...pet,
@@ -123,33 +124,33 @@ export function updateDailyGoalReward(state: StudyState, goalMet: boolean): Stud
         dailyGoalMet: true
       }
     }
-  };
+  }, "streak");
 }
 
 export function interactWithPet(state: StudyState, interaction: PetInteraction): StudyState {
   if (interaction === "pet") {
-    return {
+    return makePetSpeak({
       ...state,
       pet: {
         ...state.pet,
         mood: "happy",
         recentReward: "喵，小猫蹭了蹭你"
       }
-    };
+    }, "comfort");
   }
 
   if (interaction === "feed") {
     if (state.pet.careItems <= 0) {
-      return {
+      return makePetSpeak({
         ...state,
         pet: {
           ...state.pet,
           recentReward: "小鱼干不够，完成任务后就能再喂小猫"
         }
-      };
+      }, "low-energy");
     }
 
-    return {
+    return makePetSpeak({
       ...state,
       pet: {
         ...state.pet,
@@ -159,17 +160,17 @@ export function interactWithPet(state: StudyState, interaction: PetInteraction):
         unlockedDecorations: addCollection(state.pet, "fed-kitten"),
         recentReward: "小猫吃到小鱼干，今天更有精神了"
       }
-    };
+    }, "comfort");
   }
 
   if (state.pet.energy < 10) {
-    return {
+    return makePetSpeak({
       ...state,
       pet: {
         ...state.pet,
         recentReward: "小猫想先补充一点能量，再一起玩"
       }
-    };
+    }, "low-energy");
   }
 
   const pet = addPetExperience(
@@ -182,13 +183,13 @@ export function interactWithPet(state: StudyState, interaction: PetInteraction):
     "你陪小猫玩了一会儿，小猫获得 5 点经验"
   );
 
-  return {
+  return makePetSpeak({
     ...state,
     pet: {
       ...pet,
       mood: "proud"
     }
-  };
+  }, "coach");
 }
 
 export function purchasePetDecoration(state: StudyState, decorationId: string): StudyState {
@@ -201,16 +202,16 @@ export function purchasePetDecoration(state: StudyState, decorationId: string): 
   }
 
   if (state.pet.careItems < decoration.cost) {
-    return {
+    return makePetSpeak({
       ...state,
       pet: {
         ...state.pet,
         recentReward: `还差 ${decoration.cost - state.pet.careItems} 个小鱼干才能兑换${decoration.name}`
       }
-    };
+    }, "low-energy");
   }
 
-  return {
+  return makePetSpeak({
     ...state,
     pet: {
       ...state.pet,
@@ -221,14 +222,14 @@ export function purchasePetDecoration(state: StudyState, decorationId: string): 
       mood: "proud",
       recentReward: `小猫穿上了${decoration.name}`
     }
-  };
+  }, "decoration");
 }
 
 export function equipPetDecoration(state: StudyState, decorationId: string): StudyState {
   const decoration = getCatDecoration(decorationId);
   if (!decoration || !(state.pet.ownedDecorationIds ?? []).includes(decorationId)) return state;
 
-  return {
+  return makePetSpeak({
     ...state,
     pet: {
       ...state.pet,
@@ -236,13 +237,13 @@ export function equipPetDecoration(state: StudyState, decorationId: string): Stu
       mood: "happy",
       recentReward: `小猫换上了${decoration.name}`
     }
-  };
+  }, "decoration");
 }
 
 export function removePetDecoration(state: StudyState): StudyState {
   if (!state.pet.equippedDecorationId) return state;
 
-  return {
+  return makePetSpeak({
     ...state,
     pet: {
       ...state.pet,
@@ -250,5 +251,5 @@ export function removePetDecoration(state: StudyState): StudyState {
       mood: "calm",
       recentReward: "小猫把装饰收好了，想换时还能再穿上"
     }
-  };
+  }, "decoration");
 }

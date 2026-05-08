@@ -267,6 +267,31 @@ textarea {
   font-weight: 800;
 }
 
+.petSpeechBubble {
+  position: relative;
+  max-width: 620px;
+  border: 1px solid #f0d894;
+  border-radius: 8px;
+  background: #fff9e8;
+  color: #4f4219;
+  padding: 10px 12px;
+  font-weight: 800;
+  line-height: 1.55;
+}
+
+.petSpeechBubble::before {
+  content: "";
+  position: absolute;
+  left: 18px;
+  top: -8px;
+  width: 14px;
+  height: 14px;
+  border-left: 1px solid #f0d894;
+  border-top: 1px solid #f0d894;
+  background: inherit;
+  transform: rotate(45deg);
+}
+
 .xpTrack {
   height: 10px;
   overflow: hidden;
@@ -1025,6 +1050,33 @@ textarea {
   margin: 0;
 }
 
+.petNameForm {
+  display: grid;
+  gap: 8px;
+}
+
+.petNameForm label {
+  color: #3f7c6b;
+  font-weight: 800;
+}
+
+.petNameForm div {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) auto auto;
+  gap: 8px;
+}
+
+.petNameForm input {
+  min-width: 0;
+  min-height: 48px;
+  border: 1px solid #b7c9c3;
+  border-radius: 8px;
+  background: #fff;
+  color: #263238;
+  padding: 0 12px;
+  font-weight: 800;
+}
+
 .playgroundActions {
   display: grid;
   gap: 10px;
@@ -1562,5 +1614,9 @@ textarea {
 
   .playgroundCat {
     min-height: 300px;
+  }
+
+  .petNameForm div {
+    grid-template-columns: 1fr;
   }
 }

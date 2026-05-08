@@ -18,6 +18,7 @@ describe("rewards", () => {
     expect(next.pet.experience).toBe(10);
     expect(next.pet.mood).toBe("happy");
     expect(next.pet.recentReward).toContain("专注");
+    expect(next.pet.speech?.kind).toBe("focus");
     expect(next.reviews["2026-04-28"].focusMinutes).toBe(15);
   });
 
@@ -30,6 +31,7 @@ describe("rewards", () => {
     expect(next.pet.careItems).toBe(1);
     expect(next.pet.experience).toBe(20);
     expect(next.pet.recentReward).toContain("任务");
+    expect(next.pet.speech?.kind).toBe("task");
     expect(next.reviews["2026-04-28"].completedTaskIds).toContain(task.id);
     expect(repeated.pet.careItems).toBe(1);
     expect(repeated.pet.experience).toBe(20);
@@ -65,6 +67,7 @@ describe("rewards", () => {
     expect(next.pet.unlockedDecorations).toContain("kitten-bell");
     expect(next.pet.experience).toBe(15);
     expect(next.pet.recentReward).toContain("连续");
+    expect(next.pet.speech?.kind).toBe("streak");
   });
 
   it("uses fish treats to feed the kitten and save a collection memory", () => {
@@ -106,6 +109,7 @@ describe("rewards", () => {
     expect(next.pet.equippedDecorationId).toBe("pink-bow");
     expect(next.pet.unlockedDecorations).toContain("decoration-pink-bow");
     expect(next.pet.recentReward).toContain("粉色蝴蝶结");
+    expect(next.pet.speech?.kind).toBe("decoration");
   });
 
   it("switches to an owned kitten decoration without spending fish treats", () => {

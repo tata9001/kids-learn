@@ -80,6 +80,7 @@ export interface FocusSession {
 }
 
 export interface PetState {
+  name?: string;
   level: number;
   energy: number;
   experience: number;
@@ -92,6 +93,17 @@ export interface PetState {
   streakDays: number;
   recentReward: string;
   nextUnlock: string;
+  speech?: PetSpeech;
+}
+
+export type PetSpeechKind = "greeting" | "start" | "focus" | "task" | "streak" | "comfort" | "coach" | "decoration";
+
+export interface PetSpeech {
+  id: string;
+  kind: PetSpeechKind;
+  text: string;
+  createdAt: string;
+  source: "local";
 }
 
 export interface DailyReview {

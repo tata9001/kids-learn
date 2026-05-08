@@ -1,5 +1,6 @@
 import type { PetState } from "../domain/types";
 import { CAT_DECORATIONS, CAT_STAGES, getCatDecoration, getCollectionLabel } from "../domain/cats";
+import { getPetDisplayName } from "../domain/petSpeech";
 import { CatFigure } from "./CatCompanion";
 
 const STAT_GUIDE = [
@@ -33,6 +34,7 @@ const STAT_GUIDE = [
 export function CatGallery({ pet }: { pet: PetState }) {
   const decorations = pet.unlockedDecorations.length;
   const equippedDecoration = pet.equippedDecorationId ? getCatDecoration(pet.equippedDecorationId) : undefined;
+  const petName = getPetDisplayName(pet);
 
   return (
     <section className="catGallery">
@@ -40,7 +42,7 @@ export function CatGallery({ pet }: { pet: PetState }) {
         <div>
           <p className="eyebrow">成长伙伴</p>
           <h2>认识每只小猫</h2>
-          <p>每一次专注、完成任务和连续坚持，都会让小猫更精神，也让孩子更容易期待下一次学习。</p>
+          <p>{petName}会记录每一次专注、完成任务和连续坚持，让孩子更容易期待下一次学习。</p>
         </div>
         <div className="galleryHeroStats" aria-label="当前小猫数据">
           <span>能量 {pet.energy}</span>
@@ -84,7 +86,7 @@ export function CatGallery({ pet }: { pet: PetState }) {
       </section>
 
       <section className="collectionShelf" aria-label="小猫收藏">
-        <h2>已经收藏</h2>
+        <h2>{petName}已经收藏</h2>
         <div className="ownedDecorationRow" aria-label="已拥有装饰">
           {CAT_DECORATIONS.map((decoration) => {
             const owned = (pet.ownedDecorationIds ?? []).includes(decoration.id);

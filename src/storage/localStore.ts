@@ -1,4 +1,5 @@
 import { createDefaultState } from "../domain/defaultState";
+import { sanitizePetName } from "../domain/petSpeech";
 import type { PetState, StudyState, Task } from "../domain/types";
 
 export const STORAGE_KEY = "study-companion-state";
@@ -65,13 +66,18 @@ function normalizePet(pet: Partial<PetState>): PetState {
   const ownedDecorationIds = pet.ownedDecorationIds ?? [];
   const equippedDecorationId =
     pet.equippedDecorationId && ownedDecorationIds.includes(pet.equippedDecorationId) ? pet.equippedDecorationId : undefined;
+  const name = typeof pet.name === "string" ? sanitizePetName(pet.name) : undefined;
+  const speech =
+    pet.speech && typeof pet.speech.text === "string" && typeof pet.speech.createdAt === "string" ? pet.speech : undefined;
 
   return {
     ...defaults,
     ...pet,
+    name,
     unlockedDecorations: pet.unlockedDecorations ?? [],
     ownedDecorationIds,
-    equippedDecorationId
+    equippedDecorationId,
+    speech
   };
 }
 

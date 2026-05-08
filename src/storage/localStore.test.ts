@@ -92,6 +92,24 @@ describe("localStore", () => {
     expect(loaded.profile.childName).toBe("小朋友");
   });
 
+  it("normalizes version 2 pet naming and speech fields when they are missing", () => {
+    const state = testState();
+    const { name: _name, speech: _speech, ...petWithoutSpeech } = state.pet;
+    localStorage.setItem(
+      "study-companion-state",
+      JSON.stringify({
+        ...state,
+        pet: petWithoutSpeech
+      })
+    );
+
+    const loaded = loadStudyState();
+
+    expect(loaded.pet.name).toBeUndefined();
+    expect(loaded.pet.speech).toBeUndefined();
+    expect(loaded.pet.level).toBe(state.pet.level);
+  });
+
   it("exports and clears data", () => {
     const state = testState();
     saveStudyState(state);

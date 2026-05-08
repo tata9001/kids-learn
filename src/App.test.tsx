@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it } from "vitest";
 import { App } from "./App";
@@ -188,6 +188,44 @@ it("opens a fullscreen kitten interaction panel from the kitten", async () => {
   await user.click(screen.getByRole("button", { name: "摸摸小猫" }));
 
   expect(screen.getAllByText(/喵/).length).toBeGreaterThan(0);
+});
+
+it("lets children name the kitten and hear a local coach line", async () => {
+  const user = userEvent.setup();
+  const view = renderApp();
+
+  await user.click(screen.getByRole("button", { name: "孩子模式" }));
+  await user.click(screen.getByRole("button", { name: "和小猫互动" }));
+  const dialog = screen.getByRole("dialog", { name: "小猫互动" });
+  await user.clear(screen.getByLabelText("小猫名字"));
+  await user.type(screen.getByLabelText("小猫名字"), "豆豆");
+  await user.click(within(dialog).getByRole("button", { name: "保存小猫名字" }));
+
+  expect(within(dialog).getByRole("heading", { name: "豆豆 · 奶糖小猫" })).toBeInTheDocument();
+  expect(within(dialog).getByText(/以后我就叫豆豆/)).toBeInTheDocument();
+
+  await user.click(within(dialog).getByRole("button", { name: "小猫说一句" }));
+  expect(within(dialog).getByText(/豆豆想说/)).toBeInTheDocument();
+
+  view.unmount();
+  renderApp();
+  expect(screen.getByRole("heading", { name: "豆豆 · 奶糖小猫" })).toBeInTheDocument();
+});
+
+it("lets children return the kitten to its default name", async () => {
+  const user = userEvent.setup();
+  renderApp();
+
+  await user.click(screen.getByRole("button", { name: "孩子模式" }));
+  await user.click(screen.getByRole("button", { name: "和小猫互动" }));
+  const dialog = screen.getByRole("dialog", { name: "小猫互动" });
+  await user.clear(screen.getByLabelText("小猫名字"));
+  await user.type(screen.getByLabelText("小猫名字"), "豆豆");
+  await user.click(within(dialog).getByRole("button", { name: "保存小猫名字" }));
+  await user.click(within(dialog).getByRole("button", { name: "恢复默认名字" }));
+
+  expect(within(dialog).getByRole("heading", { name: "小奶糖 · 奶糖小猫" })).toBeInTheDocument();
+  expect(within(dialog).getByText(/回到小奶糖这个名字/)).toBeInTheDocument();
 });
 
 it("lets children buy and wear kitten decorations in the interaction panel", async () => {

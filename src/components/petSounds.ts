@@ -1,4 +1,4 @@
-export type KittenSoundKind = "pet" | "feed" | "play" | "dress" | "undress";
+export type KittenSoundKind = "pet" | "feed" | "play" | "dress" | "undress" | "speak";
 
 export interface KittenSoundPattern {
   type: OscillatorType;
@@ -12,7 +12,8 @@ const SOUND_PATTERNS: Record<KittenSoundKind, KittenSoundPattern> = {
   feed: { type: "triangle", frequencies: [420, 540, 680, 520], duration: 0.42, volume: 0.16 },
   play: { type: "square", frequencies: [620, 840, 700, 920, 560], duration: 0.5, volume: 0.1 },
   dress: { type: "sine", frequencies: [500, 660, 880, 990], duration: 0.46, volume: 0.14 },
-  undress: { type: "triangle", frequencies: [620, 500, 390], duration: 0.36, volume: 0.12 }
+  undress: { type: "triangle", frequencies: [620, 500, 390], duration: 0.36, volume: 0.12 },
+  speak: { type: "sine", frequencies: [470, 610, 760, 640, 820], duration: 0.56, volume: 0.13 }
 };
 
 export function getKittenSoundPattern(kind: KittenSoundKind): KittenSoundPattern {
