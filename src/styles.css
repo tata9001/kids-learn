@@ -1055,6 +1055,12 @@ textarea {
   gap: 8px;
 }
 
+.voiceDisclosure {
+  color: #6f5a20;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
 .petNameForm label {
   color: #3f7c6b;
   font-weight: 800;

@@ -205,6 +205,7 @@ it("opens a fullscreen kitten interaction panel from the kitten", async () => {
   expect(screen.getByRole("button", { name: "摸摸小猫" })).toBeInTheDocument();
   expect(screen.getByRole("button", { name: "喂小鱼干" })).toBeInTheDocument();
   expect(screen.getByRole("button", { name: "陪它玩一会儿" })).toBeInTheDocument();
+  expect(screen.getByText("使用 AI 语音时，小猫声音由 AI 生成，不是真人声音。")).toBeInTheDocument();
 
   await user.click(screen.getByRole("button", { name: "摸摸小猫" }));
 

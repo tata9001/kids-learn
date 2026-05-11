@@ -39,7 +39,7 @@ export function PetPanel({ pet }: { pet: PetState }) {
     const line = buildPetSpeech(pet, "manual", new Date().toISOString()).text;
     playKittenSound("speak");
     actions.makePetSpeak("manual");
-    speakKittenLine(line);
+    void speakKittenLine(line);
   }
 
   function handleRename(event: FormEvent<HTMLFormElement>) {
@@ -106,6 +106,7 @@ export function PetPanel({ pet }: { pet: PetState }) {
             <p className="eyebrow">全屏互动 · 等级 {pet.level}</p>
             <h2>{petName} · {stage.title}</h2>
             <p className="petSpeechBubble">{speechLine}</p>
+            <p className="voiceDisclosure">使用 AI 语音时，小猫声音由 AI 生成，不是真人声音。</p>
             <form className="petNameForm" onSubmit={handleRename}>
               <label htmlFor="pet-name-input">小猫名字</label>
               <div>
