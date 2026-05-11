@@ -307,3 +307,22 @@ it("lets children buy and wear kitten decorations in the interaction panel", asy
   expect(screen.getAllByText(/未穿戴/).length).toBeGreaterThan(0);
   expect(screen.getByRole("button", { name: "穿上 粉色蝴蝶结" })).toBeInTheDocument();
 });
+
+it("lets children use 学习陪伴 prompts in the kitten panel", async () => {
+  const user = userEvent.setup();
+  renderApp();
+
+  await user.click(screen.getByRole("button", { name: "孩子模式" }));
+  await user.click(screen.getByRole("button", { name: "和小猫互动" }));
+  const dialog = screen.getByRole("dialog", { name: "小猫互动" });
+
+  expect(within(dialog).getByRole("heading", { name: "学习陪伴" })).toBeInTheDocument();
+
+  await user.click(within(dialog).getByRole("button", { name: "我卡住了" }));
+  expect(within(dialog).getByText(/先圈出题目/)).toBeInTheDocument();
+
+  await user.type(within(dialog).getByLabelText("想和小猫说什么"), "我不想写");
+  await user.click(within(dialog).getByRole("button", { name: "告诉小猫" }));
+
+  expect(within(dialog).getByText(/作业本打开/)).toBeInTheDocument();
+});

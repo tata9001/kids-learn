@@ -1,7 +1,14 @@
 import { useEffect, useState, type FormEvent } from "react";
 import type { PetState } from "../domain/types";
 import { CAT_DECORATIONS, getCatDecoration, getCatStage } from "../domain/cats";
-import { buildPetSpeech, getPetDisplayName } from "../domain/petSpeech";
+import {
+  MAX_COMPANION_INPUT_LENGTH,
+  buildPetSpeech,
+  buildStudyCompanionSpeech,
+  getPetDisplayName,
+  sanitizeCompanionMessage,
+  type StudyCompanionTrigger
+} from "../domain/petSpeech";
 import { CatFigure } from "./CatCompanion";
 import { playKittenSound, type KittenSoundKind } from "./petSounds";
 import { speakKittenLine } from "./petVoice";
@@ -11,6 +18,7 @@ export function PetPanel({ pet }: { pet: PetState }) {
   const { actions } = useStudyStore();
   const [isPlaying, setIsPlaying] = useState(false);
   const [draftName, setDraftName] = useState(getPetDisplayName(pet));
+  const [companionMessage, setCompanionMessage] = useState("");
   const [soundMessage, setSoundMessage] = useState("点一下小猫，它会回应你");
   const stage = getCatStage(pet.level);
   const petName = getPetDisplayName(pet);
@@ -40,6 +48,23 @@ export function PetPanel({ pet }: { pet: PetState }) {
     playKittenSound("speak");
     actions.makePetSpeak("manual");
     void speakKittenLine(line);
+  }
+
+  function handleStudyCompanion(trigger: StudyCompanionTrigger, childMessage?: string) {
+    const speech = buildStudyCompanionSpeech(pet, trigger, childMessage, new Date().toISOString());
+    if (!speech) return;
+
+    playKittenSound("speak");
+    actions.makeStudyCompanionSpeak(trigger, childMessage);
+    void speakKittenLine(speech.text);
+  }
+
+  function handleCompanionMessage(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const message = sanitizeCompanionMessage(companionMessage);
+    if (!message) return;
+    handleStudyCompanion("message", message);
+    setCompanionMessage("");
   }
 
   function handleRename(event: FormEvent<HTMLFormElement>) {
@@ -153,6 +178,41 @@ export function PetPanel({ pet }: { pet: PetState }) {
                 小猫说一句
               </button>
             </div>
+            <section className="studyCompanionPanel" aria-label="学习陪伴">
+              <h2>学习陪伴</h2>
+              <div className="studyCompanionButtons">
+                <button className="secondaryButton compactButton" onClick={() => handleStudyCompanion("start")}>
+                  陪我开始
+                </button>
+                <button className="secondaryButton compactButton" onClick={() => handleStudyCompanion("reluctant")}>
+                  我不想写
+                </button>
+                <button className="secondaryButton compactButton" onClick={() => handleStudyCompanion("stuck")}>
+                  我卡住了
+                </button>
+                <button className="secondaryButton compactButton" onClick={() => handleStudyCompanion("done")}>
+                  我写完了
+                </button>
+                <button className="secondaryButton compactButton" onClick={() => handleStudyCompanion("encourage")}>
+                  给我打气
+                </button>
+              </div>
+              <form className="studyCompanionForm" onSubmit={handleCompanionMessage}>
+                <label htmlFor="companion-message-input">想和小猫说什么</label>
+                <div>
+                  <input
+                    id="companion-message-input"
+                    value={companionMessage}
+                    maxLength={MAX_COMPANION_INPUT_LENGTH}
+                    placeholder="比如：我不会这题 / 我有点烦"
+                    onChange={(event) => setCompanionMessage(event.target.value)}
+                  />
+                  <button className="secondaryButton compactButton" type="submit">
+                    告诉小猫
+                  </button>
+                </div>
+              </form>
+            </section>
             <p className="catReward">{pet.recentReward}</p>
             <section className="decorationShop" aria-label="装饰小猫">
               <h2>装饰小猫</h2>
