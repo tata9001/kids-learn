@@ -142,6 +142,28 @@ export function makeStudyCompanionSpeak(
   };
 }
 
+export function recordPetSpeech(
+  state: StudyState,
+  speech: Pick<PetSpeech, "text" | "kind" | "source" | "createdAt">
+): StudyState {
+  const text = Array.from(speech.text.trim()).slice(0, 180).join("");
+  if (!text) return state;
+
+  return {
+    ...state,
+    pet: {
+      ...state.pet,
+      speech: {
+        id: `pet-speech-${speech.createdAt}`,
+        kind: speech.kind,
+        text,
+        createdAt: speech.createdAt,
+        source: speech.source
+      }
+    }
+  };
+}
+
 export function makePetSpeak(state: StudyState, trigger: PetSpeechTrigger, createdAt = new Date().toISOString()): StudyState {
   return {
     ...state,

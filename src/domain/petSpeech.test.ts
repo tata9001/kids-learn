@@ -4,6 +4,7 @@ import {
   clearPetName,
   getPetDisplayName,
   makePetSpeak,
+  recordPetSpeech,
   renamePet,
   sanitizeCompanionMessage
 } from "./petSpeech";
@@ -96,5 +97,32 @@ describe("kitten study companion speech", () => {
     expect(speech?.kind).toBe("comfort");
     expect(speech?.text).toContain("找爸爸妈妈或老师");
     expect(speech?.text).toContain("不用一个人扛着");
+  });
+
+  it("records an AI companion reply without losing pet progress", () => {
+    const state = testState({
+      pet: {
+        ...testState().pet,
+        level: 3,
+        experience: 20
+      }
+    });
+
+    const next = recordPetSpeech(state, {
+      text: "我听见你卡住了。先圈出关键词，我陪你看第一步。",
+      kind: "coach",
+      source: "ai",
+      createdAt: "2026-05-15T08:00:00+08:00"
+    });
+
+    expect(next.pet.level).toBe(3);
+    expect(next.pet.experience).toBe(20);
+    expect(next.pet.speech).toEqual({
+      id: "pet-speech-2026-05-15T08:00:00+08:00",
+      kind: "coach",
+      text: "我听见你卡住了。先圈出关键词，我陪你看第一步。",
+      createdAt: "2026-05-15T08:00:00+08:00",
+      source: "ai"
+    });
   });
 });

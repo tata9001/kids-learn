@@ -8,6 +8,7 @@ import {
   clearPetName,
   makePetSpeak,
   makeStudyCompanionSpeak,
+  recordPetSpeech,
   renamePet,
   type PetSpeechTrigger,
   type StudyCompanionTrigger
@@ -53,6 +54,7 @@ interface StudyActions {
   clearPetName(): void;
   makePetSpeak(trigger: PetSpeechTrigger): void;
   makeStudyCompanionSpeak(trigger: StudyCompanionTrigger, childMessage?: string): void;
+  recordPetSpeech(input: Parameters<typeof recordPetSpeech>[1]): void;
   copyUnfinished(fromDateKey: string): void;
   resetData(): void;
 }
@@ -144,6 +146,9 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
       },
       makeStudyCompanionSpeak(trigger, childMessage) {
         setState((current) => makeStudyCompanionSpeak(current, trigger, childMessage));
+      },
+      recordPetSpeech(input) {
+        setState((current) => recordPetSpeech(current, input));
       },
       copyUnfinished(fromDateKey) {
         setState((current) => copyUnfinishedTasksToToday(current, fromDateKey));

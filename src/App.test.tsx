@@ -1,6 +1,6 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { App } from "./App";
 import { StudyProvider } from "./state/useStudyStore";
 import { createDefaultState } from "./domain/defaultState";
@@ -37,6 +37,11 @@ beforeEach(() => {
     configurable: true,
     value: undefined
   });
+});
+
+afterEach(() => {
+  vi.unstubAllEnvs();
+  vi.unstubAllGlobals();
 });
 
 describe("App shell", () => {
@@ -325,4 +330,46 @@ it("lets children use 学习陪伴 prompts in the kitten panel", async () => {
   await user.click(within(dialog).getByRole("button", { name: "告诉小猫" }));
 
   expect(within(dialog).getByText(/作业本打开/)).toBeInTheDocument();
+});
+
+it("uses AI companion replies for kitten study chat when configured", async () => {
+  vi.stubEnv("VITE_KITTEN_VOICE_API_URL", "https://voice.example.com/kitten-speech");
+  const fetcher = vi.fn(async (input: RequestInfo | URL) => {
+    if (String(input).endsWith("/kitten-chat")) {
+      return new Response(
+        JSON.stringify({
+          text: "我听见你有点烦，也真的卡住了。先圈出关键词，我陪你看第一步。",
+          emotion: "coach",
+          nextAction: "圈出关键词",
+          shouldAskAdult: false,
+          source: "ai"
+        }),
+        { headers: { "Content-Type": "application/json" } }
+      );
+    }
+
+    return new Response(new Blob(["mp3"], { type: "audio/mpeg" }), { headers: { "Content-Type": "audio/mpeg" } });
+  });
+  vi.stubGlobal("fetch", fetcher);
+  const play = vi.fn(async () => undefined);
+  vi.stubGlobal(
+    "Audio",
+    class {
+      play = play;
+    }
+  );
+  URL.createObjectURL = vi.fn(() => "blob:kitten-voice");
+  URL.revokeObjectURL = vi.fn();
+  const user = userEvent.setup();
+  renderApp();
+
+  await user.click(screen.getByRole("button", { name: "孩子模式" }));
+  await user.click(screen.getByRole("button", { name: "和小猫互动" }));
+  const dialog = screen.getByRole("dialog", { name: "小猫互动" });
+  await user.type(within(dialog).getByLabelText("想和小猫说什么"), "我不会这道题，我有点烦");
+  await user.click(within(dialog).getByRole("button", { name: "告诉小猫" }));
+
+  expect(await within(dialog).findByText(/我听见你有点烦/)).toBeInTheDocument();
+  expect(fetcher).toHaveBeenCalledWith("https://voice.example.com/kitten-chat", expect.any(Object));
+  expect(fetcher).toHaveBeenCalledWith("https://voice.example.com/kitten-speech", expect.any(Object));
 });

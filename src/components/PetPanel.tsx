@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
-import type { PetState } from "../domain/types";
+import type { PetSpeechKind, PetState } from "../domain/types";
 import { CAT_DECORATIONS, getCatDecoration, getCatStage } from "../domain/cats";
 import {
   MAX_COMPANION_INPUT_LENGTH,
@@ -10,13 +10,15 @@ import {
   type StudyCompanionTrigger
 } from "../domain/petSpeech";
 import { CatFigure } from "./CatCompanion";
+import { askKittenCompanion, type KittenCompanionEmotion } from "./kittenChat";
 import { playKittenSound, type KittenSoundKind } from "./petSounds";
 import { speakKittenLine } from "./petVoice";
 import { useStudyStore } from "../state/useStudyStore";
 
 export function PetPanel({ pet }: { pet: PetState }) {
-  const { actions } = useStudyStore();
+  const { state, actions } = useStudyStore();
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isCompanionThinking, setIsCompanionThinking] = useState(false);
   const [draftName, setDraftName] = useState(getPetDisplayName(pet));
   const [companionMessage, setCompanionMessage] = useState("");
   const [soundMessage, setSoundMessage] = useState("点一下小猫，它会回应你");
@@ -50,12 +52,46 @@ export function PetPanel({ pet }: { pet: PetState }) {
     void speakKittenLine(line);
   }
 
-  function handleStudyCompanion(trigger: StudyCompanionTrigger, childMessage?: string) {
-    const speech = buildStudyCompanionSpeech(pet, trigger, childMessage, new Date().toISOString());
+  function speechKindForCompanionEmotion(emotion: KittenCompanionEmotion): PetSpeechKind {
+    if (emotion === "care") return "comfort";
+    if (emotion === "celebrate") return "task";
+    return "coach";
+  }
+
+  async function handleStudyCompanion(trigger: StudyCompanionTrigger, childMessage?: string) {
+    const createdAt = new Date().toISOString();
+    const localSpeech = buildStudyCompanionSpeech(pet, trigger, childMessage, createdAt);
+    const message = trigger === "message" ? sanitizeCompanionMessage(childMessage ?? "") : localSpeech?.text ?? trigger;
+    if (!localSpeech || !message) return;
+
+    setIsCompanionThinking(true);
+    const activeTask = state.activeTaskId ? state.tasks[state.activeTaskId] : undefined;
+    const aiResult = await askKittenCompanion({
+      message,
+      trigger,
+      petName,
+      petLevel: pet.level,
+      currentTaskName: activeTask?.name
+    });
+    setIsCompanionThinking(false);
+
+    const speech = aiResult.ok
+      ? {
+          text: aiResult.reply.text,
+          kind: speechKindForCompanionEmotion(aiResult.reply.emotion),
+          source: aiResult.reply.source,
+          createdAt
+        }
+      : localSpeech;
+
     if (!speech) return;
 
     playKittenSound("speak");
-    actions.makeStudyCompanionSpeak(trigger, childMessage);
+    if (aiResult.ok) {
+      actions.recordPetSpeech(speech);
+    } else {
+      actions.makeStudyCompanionSpeak(trigger, childMessage);
+    }
     void speakKittenLine(speech.text);
   }
 
@@ -180,20 +216,21 @@ export function PetPanel({ pet }: { pet: PetState }) {
             </div>
             <section className="studyCompanionPanel" aria-label="学习陪伴">
               <h2>学习陪伴</h2>
+              {isCompanionThinking && <p className="companionThinking">小猫正在认真听你说...</p>}
               <div className="studyCompanionButtons">
-                <button className="secondaryButton compactButton" onClick={() => handleStudyCompanion("start")}>
+                <button className="secondaryButton compactButton" disabled={isCompanionThinking} onClick={() => void handleStudyCompanion("start")}>
                   陪我开始
                 </button>
-                <button className="secondaryButton compactButton" onClick={() => handleStudyCompanion("reluctant")}>
+                <button className="secondaryButton compactButton" disabled={isCompanionThinking} onClick={() => void handleStudyCompanion("reluctant")}>
                   我不想写
                 </button>
-                <button className="secondaryButton compactButton" onClick={() => handleStudyCompanion("stuck")}>
+                <button className="secondaryButton compactButton" disabled={isCompanionThinking} onClick={() => void handleStudyCompanion("stuck")}>
                   我卡住了
                 </button>
-                <button className="secondaryButton compactButton" onClick={() => handleStudyCompanion("done")}>
+                <button className="secondaryButton compactButton" disabled={isCompanionThinking} onClick={() => void handleStudyCompanion("done")}>
                   我写完了
                 </button>
-                <button className="secondaryButton compactButton" onClick={() => handleStudyCompanion("encourage")}>
+                <button className="secondaryButton compactButton" disabled={isCompanionThinking} onClick={() => void handleStudyCompanion("encourage")}>
                   给我打气
                 </button>
               </div>
@@ -208,7 +245,7 @@ export function PetPanel({ pet }: { pet: PetState }) {
                     onChange={(event) => setCompanionMessage(event.target.value)}
                   />
                   <button className="secondaryButton compactButton" type="submit">
-                    告诉小猫
+                    {isCompanionThinking ? "小猫在听" : "告诉小猫"}
                   </button>
                 </div>
               </form>

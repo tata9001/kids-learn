@@ -103,7 +103,7 @@ export interface PetSpeech {
   kind: PetSpeechKind;
   text: string;
   createdAt: string;
-  source: "local";
+  source: "local" | "ai";
 }
 
 export interface DailyReview {
