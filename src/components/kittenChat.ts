@@ -1,5 +1,13 @@
+import type { ApprovedKittenMemory, ChildCompanionProfile, KittenMemoryKind } from "../domain/types";
+
 export type KittenCompanionEmotion = "care" | "coach" | "celebrate" | "start";
 export type KittenCompanionSource = "ai" | "local";
+
+export interface KittenMemoryCandidateReply {
+  kind: KittenMemoryKind;
+  text: string;
+  confidence: number;
+}
 
 export interface KittenCompanionRequest {
   message: string;
@@ -7,6 +15,8 @@ export interface KittenCompanionRequest {
   petName: string;
   petLevel: number;
   currentTaskName?: string;
+  childProfile?: Partial<ChildCompanionProfile>;
+  approvedMemories?: Pick<ApprovedKittenMemory, "id" | "kind" | "text">[];
 }
 
 export interface KittenCompanionReply {
@@ -15,6 +25,7 @@ export interface KittenCompanionReply {
   nextAction: string;
   shouldAskAdult: boolean;
   source: KittenCompanionSource;
+  memoryCandidates: KittenMemoryCandidateReply[];
 }
 
 export type KittenCompanionResult = { ok: true; reply: KittenCompanionReply } | { ok: false };
@@ -41,15 +52,41 @@ export function resolveKittenChatApiUrl(voiceApiUrl = import.meta.env.VITE_KITTE
   }
 }
 
-function isKittenCompanionReply(value: unknown): value is KittenCompanionReply {
-  const reply = value as Partial<KittenCompanionReply>;
+function isKittenMemoryCandidateReply(value: unknown): value is KittenMemoryCandidateReply {
+  const candidate = value as Partial<KittenMemoryCandidateReply>;
   return (
+    (candidate.kind === "profile" || candidate.kind === "preference" || candidate.kind === "learning" || candidate.kind === "emotion") &&
+    typeof candidate.text === "string" &&
+    typeof candidate.confidence === "number" &&
+    Number.isFinite(candidate.confidence) &&
+    candidate.confidence >= 0 &&
+    candidate.confidence <= 1
+  );
+}
+
+function normalizeKittenCompanionReply(value: unknown): KittenCompanionReply | undefined {
+  const reply = value as Partial<KittenCompanionReply>;
+  const memoryCandidates = reply.memoryCandidates ?? [];
+  if (
     typeof reply.text === "string" &&
     typeof reply.nextAction === "string" &&
     typeof reply.shouldAskAdult === "boolean" &&
     (reply.emotion === "care" || reply.emotion === "coach" || reply.emotion === "celebrate" || reply.emotion === "start") &&
-    (reply.source === "ai" || reply.source === "local")
-  );
+    (reply.source === "ai" || reply.source === "local") &&
+    Array.isArray(memoryCandidates) &&
+    memoryCandidates.every(isKittenMemoryCandidateReply)
+  ) {
+    return {
+      text: reply.text,
+      emotion: reply.emotion,
+      nextAction: reply.nextAction,
+      shouldAskAdult: reply.shouldAskAdult,
+      source: reply.source,
+      memoryCandidates
+    };
+  }
+
+  return undefined;
 }
 
 export async function askKittenCompanion(
@@ -67,8 +104,8 @@ export async function askKittenCompanion(
     });
     if (!response.ok) return { ok: false };
 
-    const reply = await response.json();
-    return isKittenCompanionReply(reply) ? { ok: true, reply } : { ok: false };
+    const reply = normalizeKittenCompanionReply(await response.json());
+    return reply ? { ok: true, reply } : { ok: false };
   } catch {
     return { ok: false };
   }

@@ -110,6 +110,48 @@ describe("localStore", () => {
     expect(loaded.pet.level).toBe(state.pet.level);
   });
 
+  it("normalizes old version 2 states missing companion profile and memory fields", () => {
+    const state = testState();
+    const {
+      childCompanionProfile: _childCompanionProfile,
+      pendingKittenMemoryCandidates: _pendingKittenMemoryCandidates,
+      approvedKittenMemories: _approvedKittenMemories,
+      ...oldVersionTwoState
+    } = state;
+    localStorage.setItem("study-companion-state", JSON.stringify(oldVersionTwoState));
+
+    const loaded = loadStudyState();
+
+    expect(loaded.version).toBe(2);
+    expect(loaded.profile).toEqual(state.profile);
+    expect(loaded.childCompanionProfile).toEqual({
+      gradeBand: "unknown",
+      favoriteColors: [],
+      favoriteDecorations: [],
+      trickySubjects: []
+    });
+    expect(loaded.pendingKittenMemoryCandidates).toEqual([]);
+    expect(loaded.approvedKittenMemories).toEqual([]);
+  });
+
+  it("normalizes malformed version 2 memory fields to empty arrays", () => {
+    const state = testState();
+    localStorage.setItem(
+      "study-companion-state",
+      JSON.stringify({
+        ...state,
+        pendingKittenMemoryCandidates: "not an array",
+        approvedKittenMemories: { stale: "not an array" }
+      })
+    );
+
+    const loaded = loadStudyState();
+
+    expect(loaded.version).toBe(2);
+    expect(loaded.pendingKittenMemoryCandidates).toEqual([]);
+    expect(loaded.approvedKittenMemories).toEqual([]);
+  });
+
   it("exports and clears data", () => {
     const state = testState();
     saveStudyState(state);

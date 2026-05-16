@@ -17,6 +17,9 @@ function Probe() {
       <p>{task?.completionDetails?.childNote ?? "no-note"}</p>
       <p>{task?.parentComment ?? "no-comment"}</p>
       <p>{template?.paused ? "paused" : "not-paused"}</p>
+      <p>{state.childCompanionProfile.nickname ?? "no-nickname"}</p>
+      <p>pending kitten memories: {state.pendingKittenMemoryCandidates.length}</p>
+      <p>{state.approvedKittenMemories.map((memory) => memory.text).join(",") || "no-memory"}</p>
       <button onClick={() => actions.setMode("parent")}>家长</button>
       <button
         onClick={() =>
@@ -52,6 +55,18 @@ function Probe() {
         加重复
       </button>
       <button onClick={() => template && actions.pauseRecurringTask(template.id)}>暂停重复</button>
+      <button onClick={() => actions.updateChildCompanionProfile({ nickname: "小雨", gradeBand: "lower-primary" })}>更新小猫资料</button>
+      <button onClick={() => actions.addKittenMemoryCandidates([{ kind: "learning", text: "小雨数学口算容易烦。", confidence: 0.8 }])}>
+        添加小猫记忆候选
+      </button>
+      <button
+        onClick={() => {
+          const candidate = state.pendingKittenMemoryCandidates[0];
+          if (candidate) actions.approveKittenMemoryCandidate(candidate.id, "小雨数学口算容易烦。");
+        }}
+      >
+        批准小猫记忆
+      </button>
     </div>
   );
 }
@@ -93,5 +108,24 @@ describe("StudyProvider", () => {
 
     await user.click(screen.getByRole("button", { name: "暂停重复" }));
     expect(screen.getByText("paused")).toBeInTheDocument();
+  });
+
+  it("exposes child companion profile and kitten memory actions", async () => {
+    const user = userEvent.setup();
+    render(
+      <StudyProvider>
+        <Probe />
+      </StudyProvider>
+    );
+
+    await user.click(screen.getByRole("button", { name: "更新小猫资料" }));
+    expect(screen.getByText("小雨")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "添加小猫记忆候选" }));
+    expect(screen.getByText("pending kitten memories: 1")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "批准小猫记忆" }));
+    expect(screen.getByText("小雨数学口算容易烦。")).toBeInTheDocument();
+    expect(screen.getByText("pending kitten memories: 0")).toBeInTheDocument();
   });
 });

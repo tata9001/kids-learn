@@ -51,6 +51,14 @@ export function createDefaultState(now = new Date()): StudyState {
     },
     reviews: {
       [key]: createEmptyReview(key)
-    }
+    },
+    childCompanionProfile: {
+      gradeBand: "unknown",
+      favoriteColors: [],
+      favoriteDecorations: [],
+      trickySubjects: []
+    },
+    pendingKittenMemoryCandidates: [],
+    approvedKittenMemories: []
   };
 }

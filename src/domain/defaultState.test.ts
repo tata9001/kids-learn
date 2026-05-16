@@ -19,6 +19,14 @@ describe("createDefaultState", () => {
     expect(state.pet.experienceToNextLevel).toBe(40);
     expect(state.pet.recentReward).toContain("小猫");
     expect(state.pet.nextUnlock).toContain("铃铛");
+    expect(state.childCompanionProfile).toEqual({
+      gradeBand: "unknown",
+      favoriteColors: [],
+      favoriteDecorations: [],
+      trickySubjects: []
+    });
+    expect(state.pendingKittenMemoryCandidates).toEqual([]);
+    expect(state.approvedKittenMemories).toEqual([]);
   });
 
   it("uses stable date keys", () => {

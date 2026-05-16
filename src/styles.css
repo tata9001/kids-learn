@@ -1111,6 +1111,48 @@ textarea {
   font-weight: 800;
 }
 
+.voiceCompanionBox {
+  display: grid;
+  gap: 8px;
+  border: 1px solid #b9d8ce;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 12px;
+}
+
+.voiceButton {
+  width: 100%;
+  min-height: 52px;
+}
+
+.voice-recording {
+  border-color: #e86f51;
+  background: #fff6f0;
+}
+
+.voice-recording .voiceButton {
+  background: #d94f38;
+}
+
+.childTranscript,
+.memoryCandidateHint {
+  margin: 0;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.childTranscript {
+  background: #eef6ff;
+  color: #244e7a;
+}
+
+.memoryCandidateHint {
+  background: #fff3c7;
+  color: #755a00;
+}
+
 .studyCompanionButtons {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1164,6 +1206,63 @@ textarea {
 .decorationGrid {
   display: grid;
   gap: 10px;
+}
+
+.memoryPanel {
+  display: grid;
+  gap: 14px;
+}
+
+.memorySafetyNote {
+  margin: 0;
+  color: #5a625f;
+  line-height: 1.6;
+}
+
+.memoryProfileSummary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.memoryProfileSummary span,
+.memoryKind {
+  border-radius: 8px;
+  background: #edf6f2;
+  color: #315f52;
+  padding: 6px 10px;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.memoryColumns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.memoryColumns section,
+.memoryCard {
+  display: grid;
+  gap: 10px;
+}
+
+.memoryColumns h3,
+.memoryCard p {
+  margin: 0;
+}
+
+.memoryCard {
+  border: 1px solid #d6e3df;
+  border-radius: 8px;
+  background: #fff;
+  padding: 12px;
+}
+
+.emptyState {
+  margin: 0;
+  color: #63706b;
+  font-weight: 700;
 }
 
 .decorationCard {
@@ -1669,7 +1768,8 @@ textarea {
   .reviewGrid,
   .galleryHero,
   .catStageGrid,
-  .statGuideGrid {
+  .statGuideGrid,
+  .memoryColumns {
     grid-template-columns: 1fr;
   }
 

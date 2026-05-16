@@ -18,7 +18,17 @@ describe("kitten chat client", () => {
         trigger: "message",
         petName: "豆豆",
         petLevel: 3,
-        currentTaskName: "数学口算"
+        currentTaskName: "数学口算",
+        childProfile: {
+          nickname: "小雨",
+          gradeBand: "lower-primary",
+          favoriteColors: ["粉色"],
+          favoriteDecorations: [],
+          trickySubjects: ["math"]
+        },
+        approvedMemories: [
+          { id: "memory-1", kind: "learning", text: "小雨做数学口算时容易着急。" }
+        ]
       });
 
       return new Response(
@@ -27,7 +37,8 @@ describe("kitten chat client", () => {
           emotion: "coach",
           nextAction: "圈出关键词",
           shouldAskAdult: false,
-          source: "ai"
+          source: "ai",
+          memoryCandidates: [{ kind: "learning", text: "小雨数学口算时容易烦。", confidence: 0.74 }]
         }),
         { headers: { "Content-Type": "application/json" } }
       );
@@ -39,7 +50,17 @@ describe("kitten chat client", () => {
         trigger: "message",
         petName: "豆豆",
         petLevel: 3,
-        currentTaskName: "数学口算"
+        currentTaskName: "数学口算",
+        childProfile: {
+          nickname: "小雨",
+          gradeBand: "lower-primary",
+          favoriteColors: ["粉色"],
+          favoriteDecorations: [],
+          trickySubjects: ["math"]
+        },
+        approvedMemories: [
+          { id: "memory-1", kind: "learning", text: "小雨做数学口算时容易着急。" }
+        ]
       },
       {
         voiceApiUrl: "https://voice.example.com/kitten-speech",
@@ -54,7 +75,44 @@ describe("kitten chat client", () => {
         emotion: "coach",
         nextAction: "圈出关键词",
         shouldAskAdult: false,
-        source: "ai"
+        source: "ai",
+        memoryCandidates: [{ kind: "learning", text: "小雨数学口算时容易烦。", confidence: 0.74 }]
+      }
+    });
+  });
+
+  it("defaults missing memory candidates to an empty list", async () => {
+    const result = await askKittenCompanion(
+      {
+        message: "我不会这题",
+        trigger: "message",
+        petName: "豆豆",
+        petLevel: 3
+      },
+      {
+        voiceApiUrl: "https://voice.example.com/kitten-speech",
+        fetcher: vi.fn(async () => new Response(
+          JSON.stringify({
+            text: "我陪你先看第一步。",
+            emotion: "coach",
+            nextAction: "圈出关键词",
+            shouldAskAdult: false,
+            source: "ai"
+          }),
+          { headers: { "Content-Type": "application/json" } }
+        ))
+      }
+    );
+
+    expect(result).toEqual({
+      ok: true,
+      reply: {
+        text: "我陪你先看第一步。",
+        emotion: "coach",
+        nextAction: "圈出关键词",
+        shouldAskAdult: false,
+        source: "ai",
+        memoryCandidates: []
       }
     });
   });

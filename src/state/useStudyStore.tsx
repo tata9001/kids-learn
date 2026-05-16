@@ -27,7 +27,16 @@ import {
   type UpdateTaskInput
 } from "../domain/tasks";
 import { equipPetDecoration, interactWithPet, purchasePetDecoration, removePetDecoration, type PetInteraction } from "../domain/rewards";
-import type { AppMode, Settings, StudyState } from "../domain/types";
+import {
+  addKittenMemoryCandidates as addKittenMemoryCandidatesToState,
+  approveKittenMemoryCandidate as approveKittenMemoryCandidateInState,
+  clearKittenMemories as clearKittenMemoriesInState,
+  deleteKittenMemory as deleteKittenMemoryFromState,
+  rejectKittenMemoryCandidate as rejectKittenMemoryCandidateFromState,
+  updateChildCompanionProfile as updateChildCompanionProfileInState,
+  type NewKittenMemoryCandidate
+} from "../domain/kittenMemory";
+import type { AppMode, ChildCompanionProfile, Settings, StudyState } from "../domain/types";
 import { clearStudyState, loadStudyState, saveStudyState } from "../storage/localStore";
 
 interface StudyActions {
@@ -55,6 +64,12 @@ interface StudyActions {
   makePetSpeak(trigger: PetSpeechTrigger): void;
   makeStudyCompanionSpeak(trigger: StudyCompanionTrigger, childMessage?: string): void;
   recordPetSpeech(input: Parameters<typeof recordPetSpeech>[1]): void;
+  updateChildCompanionProfile(input: Partial<ChildCompanionProfile>): void;
+  addKittenMemoryCandidates(candidates: NewKittenMemoryCandidate[]): void;
+  approveKittenMemoryCandidate(candidateId: string, text: string): void;
+  rejectKittenMemoryCandidate(candidateId: string): void;
+  deleteKittenMemory(memoryId: string): void;
+  clearKittenMemories(): void;
   copyUnfinished(fromDateKey: string): void;
   resetData(): void;
 }
@@ -149,6 +164,24 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
       },
       recordPetSpeech(input) {
         setState((current) => recordPetSpeech(current, input));
+      },
+      updateChildCompanionProfile(input) {
+        setState((current) => updateChildCompanionProfileInState(current, input));
+      },
+      addKittenMemoryCandidates(candidates) {
+        setState((current) => addKittenMemoryCandidatesToState(current, candidates, new Date().toISOString()));
+      },
+      approveKittenMemoryCandidate(candidateId, text) {
+        setState((current) => approveKittenMemoryCandidateInState(current, candidateId, text, new Date().toISOString()));
+      },
+      rejectKittenMemoryCandidate(candidateId) {
+        setState((current) => rejectKittenMemoryCandidateFromState(current, candidateId));
+      },
+      deleteKittenMemory(memoryId) {
+        setState((current) => deleteKittenMemoryFromState(current, memoryId));
+      },
+      clearKittenMemories() {
+        setState((current) => clearKittenMemoriesInState(current));
       },
       copyUnfinished(fromDateKey) {
         setState((current) => copyUnfinishedTasksToToday(current, fromDateKey));

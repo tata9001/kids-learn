@@ -1,6 +1,9 @@
 export type AppMode = "home" | "child" | "parent" | "focus" | "cats";
 export type TaskType = "homework" | "reading" | "handwriting" | "organization";
 export type Subject = "chinese" | "math" | "english" | "other";
+export type GradeBand = "preschool" | "lower-primary" | "upper-primary" | "unknown";
+export type KittenMemoryKind = "profile" | "preference" | "learning" | "emotion";
+export type KittenMemorySource = "ai-candidate" | "child-confirmed" | "parent";
 export type FocusPresentation = "quiet" | "lively";
 export type DifficultyLevel = "none" | "a-little" | "needs-parent";
 export type RecurrenceKind = "once" | "daily" | "weekly";
@@ -33,6 +36,36 @@ export interface CompletionDetails {
   difficulty?: DifficultyLevel;
   actualReadingMinutes?: number;
   bookName?: string;
+}
+
+export interface ChildCompanionProfile {
+  nickname?: string;
+  gradeBand: GradeBand;
+  preferredAddress?: string;
+  favoriteColors: string[];
+  favoriteDecorations: string[];
+  encouragementStyle?: string;
+  trickySubjects: Subject[];
+  frustrationSupport?: string;
+  recentLearningState?: string;
+}
+
+export interface KittenMemoryCandidate {
+  id: string;
+  kind: KittenMemoryKind;
+  text: string;
+  confidence: number;
+  createdAt: string;
+  status: "pending-parent";
+}
+
+export interface ApprovedKittenMemory {
+  id: string;
+  kind: KittenMemoryKind;
+  text: string;
+  createdAt: string;
+  approvedAt: string;
+  source: KittenMemorySource;
 }
 
 export interface Task {
@@ -129,4 +162,7 @@ export interface StudyState {
   focusSessions: Record<string, FocusSession>;
   pet: PetState;
   reviews: Record<string, DailyReview>;
+  childCompanionProfile: ChildCompanionProfile;
+  pendingKittenMemoryCandidates: KittenMemoryCandidate[];
+  approvedKittenMemories: ApprovedKittenMemory[];
 }

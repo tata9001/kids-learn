@@ -224,6 +224,56 @@ export function ParentDashboard() {
 
       <ReviewPanel review={review} />
 
+      <section className="panel widePanel memoryPanel" aria-label="小猫记忆">
+        <h2>小猫记忆</h2>
+        <p className="memorySafetyNote">
+          小猫只记住帮助学习陪伴的轻量信息。请不要保存住址、学校全名、电话、身份证件、医疗诊断或家庭隐私。
+        </p>
+        <div className="memoryProfileSummary">
+          <span>称呼：{state.childCompanionProfile.nickname || state.profile.childName || "未设置"}</span>
+          <span>年级段：{state.childCompanionProfile.gradeBand}</span>
+          <span>难点：{state.childCompanionProfile.trickySubjects.length > 0 ? state.childCompanionProfile.trickySubjects.join("、") : "暂未记录"}</span>
+        </div>
+        <div className="memoryColumns">
+          <section>
+            <h3>待确认发现</h3>
+            {state.pendingKittenMemoryCandidates.length === 0 && <p className="emptyState">暂无待确认发现</p>}
+            {state.pendingKittenMemoryCandidates.map((candidate) => (
+              <article key={candidate.id} className="memoryCard">
+                <p className="memoryKind">{candidate.kind} · 可信度 {Math.round(candidate.confidence * 100)}%</p>
+                <p>{candidate.text}</p>
+                <div className="taskActions">
+                  <button className="primaryButton" onClick={() => actions.approveKittenMemoryCandidate(candidate.id, candidate.text)} aria-label={`确认 ${candidate.text}`}>
+                    确认
+                  </button>
+                  <button className="secondaryButton" onClick={() => actions.rejectKittenMemoryCandidate(candidate.id)} aria-label={`不要记住 ${candidate.text}`}>
+                    不要记住
+                  </button>
+                </div>
+              </article>
+            ))}
+          </section>
+          <section>
+            <h3>已确认记忆</h3>
+            {state.approvedKittenMemories.length === 0 && <p className="emptyState">暂无已确认记忆</p>}
+            {state.approvedKittenMemories.map((memory) => (
+              <article key={memory.id} className="memoryCard">
+                <p className="memoryKind">{memory.kind}</p>
+                <p>{memory.text}</p>
+                <button className="secondaryButton" onClick={() => actions.deleteKittenMemory(memory.id)} aria-label={`删除 ${memory.text}`}>
+                  删除
+                </button>
+              </article>
+            ))}
+            {state.approvedKittenMemories.length > 0 && (
+              <button className="secondaryButton" onClick={actions.clearKittenMemories}>
+                清空小猫记忆
+              </button>
+            )}
+          </section>
+        </div>
+      </section>
+
       <section className="panel">
         <h2>数据</h2>
         {latestPreviousDateKey && (

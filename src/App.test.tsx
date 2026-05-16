@@ -373,3 +373,127 @@ it("uses AI companion replies for kitten study chat when configured", async () =
   expect(fetcher).toHaveBeenCalledWith("https://voice.example.com/kitten-chat", expect.any(Object));
   expect(fetcher).toHaveBeenCalledWith("https://voice.example.com/kitten-speech", expect.any(Object));
 });
+
+it("keeps text input usable when microphone permission is denied", async () => {
+  Object.defineProperty(navigator, "mediaDevices", {
+    configurable: true,
+    value: { getUserMedia: vi.fn(async () => Promise.reject(new DOMException("denied", "NotAllowedError"))) }
+  });
+  const user = userEvent.setup();
+  renderApp();
+
+  await user.click(screen.getByRole("button", { name: "孩子模式" }));
+  await user.click(screen.getByRole("button", { name: "和小猫互动" }));
+  const dialog = screen.getByRole("dialog", { name: "小猫互动" });
+  await user.click(within(dialog).getByRole("button", { name: "和小猫说话" }));
+
+  expect(await within(dialog).findByText("麦克风没有打开，也可以打字告诉小猫。")).toBeInTheDocument();
+  expect(within(dialog).getByLabelText("想和小猫说什么")).toBeInTheDocument();
+});
+
+it("transcribes voice, gets an AI reply, stores memory candidates, and speaks", async () => {
+  vi.stubEnv("VITE_KITTEN_VOICE_API_URL", "https://voice.example.com/kitten-speech");
+  const stopTrack = vi.fn();
+  Object.defineProperty(navigator, "mediaDevices", {
+    configurable: true,
+    value: { getUserMedia: vi.fn(async () => ({ getTracks: () => [{ stop: stopTrack }] } as unknown as MediaStream)) }
+  });
+  class MockMediaRecorder {
+    state: "inactive" | "recording" = "inactive";
+    ondataavailable: ((event: BlobEvent) => void) | null = null;
+    onstop: (() => void) | null = null;
+
+    start() {
+      this.state = "recording";
+    }
+
+    stop() {
+      this.state = "inactive";
+      this.ondataavailable?.({ data: new Blob(["voice".repeat(80)], { type: "audio/webm" }) } as BlobEvent);
+      this.onstop?.();
+    }
+  }
+  vi.stubGlobal("MediaRecorder", MockMediaRecorder);
+  const fetcher = vi.fn(async (input: RequestInfo | URL) => {
+    if (String(input).endsWith("/kitten-transcribe")) {
+      return new Response(JSON.stringify({ text: "我不会这道题，我有点烦" }), { headers: { "Content-Type": "application/json" } });
+    }
+    if (String(input).endsWith("/kitten-chat")) {
+      return new Response(
+        JSON.stringify({
+          text: "小雨，我听见你有点烦了。我们先圈出关键词。",
+          emotion: "care",
+          nextAction: "圈出关键词",
+          shouldAskAdult: false,
+          memoryCandidates: [{ kind: "learning", text: "小雨做题烦时适合先圈关键词。", confidence: 0.8 }],
+          source: "ai"
+        }),
+        { headers: { "Content-Type": "application/json" } }
+      );
+    }
+    return new Response(new Blob(["mp3"], { type: "audio/mpeg" }), { headers: { "Content-Type": "audio/mpeg" } });
+  });
+  vi.stubGlobal("fetch", fetcher);
+  vi.stubGlobal(
+    "Audio",
+    class {
+      play = vi.fn(async () => undefined);
+    }
+  );
+  URL.createObjectURL = vi.fn(() => "blob:kitten-voice");
+  URL.revokeObjectURL = vi.fn();
+
+  const user = userEvent.setup();
+  renderApp();
+  await user.click(screen.getByRole("button", { name: "孩子模式" }));
+  await user.click(screen.getByRole("button", { name: "和小猫互动" }));
+  const dialog = screen.getByRole("dialog", { name: "小猫互动" });
+  await user.click(within(dialog).getByRole("button", { name: "和小猫说话" }));
+  await user.click(await within(dialog).findByRole("button", { name: "说完了" }));
+
+  expect(await within(dialog).findByText(/你刚才说：我不会这道题/)).toBeInTheDocument();
+  expect(await within(dialog).findByText(/小雨，我听见你有点烦/)).toBeInTheDocument();
+  expect(await within(dialog).findByText("小猫想记住 1 条新发现")).toBeInTheDocument();
+  expect(stopTrack).toHaveBeenCalled();
+});
+
+it("lets parents approve and delete kitten memories", async () => {
+  const state = createDefaultState();
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify({
+      ...state,
+      pendingKittenMemoryCandidates: [
+        {
+          id: "candidate-1",
+          kind: "learning",
+          text: "小雨数学口算容易烦。",
+          confidence: 0.82,
+          createdAt: "2026-05-16T08:00:00+08:00",
+          status: "pending-parent"
+        }
+      ],
+      approvedKittenMemories: [
+        {
+          id: "memory-1",
+          kind: "preference",
+          text: "小雨喜欢粉色小猫装饰。",
+          createdAt: "2026-05-15T08:00:00+08:00",
+          approvedAt: "2026-05-15T08:05:00+08:00",
+          source: "parent"
+        }
+      ]
+    })
+  );
+  const user = userEvent.setup();
+  renderApp();
+
+  await user.click(screen.getByRole("button", { name: "家长模式" }));
+  expect(screen.getByRole("heading", { name: "小猫记忆" })).toBeInTheDocument();
+
+  await user.click(screen.getByRole("button", { name: "确认 小雨数学口算容易烦。" }));
+  expect(screen.getByText("已确认记忆")).toBeInTheDocument();
+
+  await user.click(screen.getByRole("button", { name: "删除 小雨数学口算容易烦。" }));
+  expect(screen.queryByText("小雨数学口算容易烦。")).not.toBeInTheDocument();
+});

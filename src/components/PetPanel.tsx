@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import type { PetSpeechKind, PetState } from "../domain/types";
 import { CAT_DECORATIONS, getCatDecoration, getCatStage } from "../domain/cats";
 import {
@@ -11,6 +11,7 @@ import {
 } from "../domain/petSpeech";
 import { CatFigure } from "./CatCompanion";
 import { askKittenCompanion, type KittenCompanionEmotion } from "./kittenChat";
+import { transcribeKittenAudio } from "./kittenVoiceInput";
 import { playKittenSound, type KittenSoundKind } from "./petSounds";
 import { speakKittenLine } from "./petVoice";
 import { useStudyStore } from "../state/useStudyStore";
@@ -19,9 +20,16 @@ export function PetPanel({ pet }: { pet: PetState }) {
   const { state, actions } = useStudyStore();
   const [isPlaying, setIsPlaying] = useState(false);
   const [isCompanionThinking, setIsCompanionThinking] = useState(false);
+  const [voiceStatus, setVoiceStatus] = useState<"idle" | "recording" | "transcribing" | "thinking" | "speaking" | "error">("idle");
   const [draftName, setDraftName] = useState(getPetDisplayName(pet));
   const [companionMessage, setCompanionMessage] = useState("");
   const [soundMessage, setSoundMessage] = useState("点一下小猫，它会回应你");
+  const [voiceMessage, setVoiceMessage] = useState("可以直接和小猫说话");
+  const [lastTranscript, setLastTranscript] = useState("");
+  const [lastMemoryCandidateCount, setLastMemoryCandidateCount] = useState(0);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const mediaStreamRef = useRef<MediaStream | null>(null);
   const stage = getCatStage(pet.level);
   const petName = getPetDisplayName(pet);
   const speechLine = pet.speech?.text ?? soundMessage;
@@ -58,20 +66,26 @@ export function PetPanel({ pet }: { pet: PetState }) {
     return "coach";
   }
 
-  async function handleStudyCompanion(trigger: StudyCompanionTrigger, childMessage?: string) {
+  async function handleStudyCompanion(trigger: StudyCompanionTrigger, childMessage?: string, options: { fromVoice?: boolean } = {}) {
     const createdAt = new Date().toISOString();
     const localSpeech = buildStudyCompanionSpeech(pet, trigger, childMessage, createdAt);
     const message = trigger === "message" ? sanitizeCompanionMessage(childMessage ?? "") : localSpeech?.text ?? trigger;
     if (!localSpeech || !message) return;
 
     setIsCompanionThinking(true);
+    if (options.fromVoice) {
+      setVoiceStatus("thinking");
+      setVoiceMessage("小猫正在想怎么帮你");
+    }
     const activeTask = state.activeTaskId ? state.tasks[state.activeTaskId] : undefined;
     const aiResult = await askKittenCompanion({
       message,
       trigger,
       petName,
       petLevel: pet.level,
-      currentTaskName: activeTask?.name
+      currentTaskName: activeTask?.name,
+      childProfile: state.childCompanionProfile,
+      approvedMemories: state.approvedKittenMemories.map((memory) => ({ id: memory.id, kind: memory.kind, text: memory.text }))
     });
     setIsCompanionThinking(false);
 
@@ -89,10 +103,81 @@ export function PetPanel({ pet }: { pet: PetState }) {
     playKittenSound("speak");
     if (aiResult.ok) {
       actions.recordPetSpeech(speech);
+      if (aiResult.reply.memoryCandidates.length > 0) {
+        actions.addKittenMemoryCandidates(aiResult.reply.memoryCandidates);
+        setLastMemoryCandidateCount(aiResult.reply.memoryCandidates.length);
+      } else {
+        setLastMemoryCandidateCount(0);
+      }
     } else {
       actions.makeStudyCompanionSpeak(trigger, childMessage);
+      setLastMemoryCandidateCount(0);
     }
-    void speakKittenLine(speech.text);
+    if (options.fromVoice) {
+      setVoiceStatus("speaking");
+      setVoiceMessage("小猫正在回答你");
+    }
+    await speakKittenLine(speech.text);
+    if (options.fromVoice) {
+      setVoiceStatus("idle");
+      setVoiceMessage("可以继续和小猫说话");
+    }
+  }
+
+  async function startRecording() {
+    if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
+      setVoiceStatus("error");
+      setVoiceMessage("麦克风没有打开，也可以打字告诉小猫。");
+      return;
+    }
+
+    try {
+      setLastMemoryCandidateCount(0);
+      audioChunksRef.current = [];
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaStreamRef.current = stream;
+      const recorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = recorder;
+      recorder.ondataavailable = (event) => {
+        if (event.data.size > 0) audioChunksRef.current.push(event.data);
+      };
+      recorder.onstop = () => {
+        void finishRecording();
+      };
+      recorder.start();
+      setVoiceStatus("recording");
+      setVoiceMessage("小猫正在听你说");
+    } catch {
+      setVoiceStatus("error");
+      setVoiceMessage("麦克风没有打开，也可以打字告诉小猫。");
+    }
+  }
+
+  function stopRecording() {
+    const recorder = mediaRecorderRef.current;
+    if (recorder?.state === "recording") {
+      recorder.stop();
+    }
+  }
+
+  async function finishRecording() {
+    mediaStreamRef.current?.getTracks().forEach((track) => track.stop());
+    mediaStreamRef.current = null;
+    mediaRecorderRef.current = null;
+    setVoiceStatus("transcribing");
+    setVoiceMessage("小猫正在听清你刚才说的话");
+
+    const audioBlob = new Blob(audioChunksRef.current, { type: audioChunksRef.current[0]?.type || "audio/webm" });
+    audioChunksRef.current = [];
+    const transcript = await transcribeKittenAudio(audioBlob);
+    if (!transcript.ok) {
+      setVoiceStatus("error");
+      setVoiceMessage("小猫没有听清楚，也可以打字告诉小猫。");
+      return;
+    }
+
+    setLastTranscript(transcript.text);
+    await handleStudyCompanion("message", transcript.text, { fromVoice: true });
   }
 
   function handleCompanionMessage(event: FormEvent<HTMLFormElement>) {
@@ -217,6 +302,18 @@ export function PetPanel({ pet }: { pet: PetState }) {
             <section className="studyCompanionPanel" aria-label="学习陪伴">
               <h2>学习陪伴</h2>
               {isCompanionThinking && <p className="companionThinking">小猫正在认真听你说...</p>}
+              <div className={`voiceCompanionBox voice-${voiceStatus}`}>
+                <button
+                  className="primaryButton voiceButton"
+                  disabled={voiceStatus === "transcribing" || voiceStatus === "thinking" || voiceStatus === "speaking" || isCompanionThinking}
+                  onClick={() => (voiceStatus === "recording" ? stopRecording() : void startRecording())}
+                >
+                  {voiceStatus === "recording" ? "说完了" : "和小猫说话"}
+                </button>
+                <p className="companionThinking">{voiceMessage}</p>
+                {lastTranscript && <p className="childTranscript">你刚才说：{lastTranscript}</p>}
+                {lastMemoryCandidateCount > 0 && <p className="memoryCandidateHint">小猫想记住 {lastMemoryCandidateCount} 条新发现</p>}
+              </div>
               <div className="studyCompanionButtons">
                 <button className="secondaryButton compactButton" disabled={isCompanionThinking} onClick={() => void handleStudyCompanion("start")}>
                   陪我开始

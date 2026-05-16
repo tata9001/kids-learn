@@ -81,18 +81,36 @@ function normalizePet(pet: Partial<PetState>): PetState {
   };
 }
 
+function normalizeStudyState(state: StudyState): StudyState {
+  const defaults = createDefaultState();
+  const childCompanionProfile = state.childCompanionProfile ?? defaults.childCompanionProfile;
+
+  return {
+    ...state,
+    childCompanionProfile: {
+      ...defaults.childCompanionProfile,
+      ...childCompanionProfile,
+      favoriteColors: childCompanionProfile.favoriteColors ?? [],
+      favoriteDecorations: childCompanionProfile.favoriteDecorations ?? [],
+      trickySubjects: childCompanionProfile.trickySubjects ?? []
+    },
+    pendingKittenMemoryCandidates: Array.isArray(state.pendingKittenMemoryCandidates)
+      ? state.pendingKittenMemoryCandidates
+      : [],
+    approvedKittenMemories: Array.isArray(state.approvedKittenMemories) ? state.approvedKittenMemories : [],
+    pet: normalizePet(state.pet)
+  };
+}
+
 export function migrateStudyState(value: unknown): StudyState {
   if (isVersionTwoStudyState(value)) {
-    return {
-      ...value,
-      pet: normalizePet(value.pet)
-    };
+    return normalizeStudyState(value);
   }
   if (!isVersionOneStudyState(value)) return createDefaultState();
 
   const tasks = Object.fromEntries(Object.entries(value.tasks).map(([id, task]) => [id, migrateTask(task)]));
 
-  return {
+  return normalizeStudyState({
     ...value,
     version: 2,
     tasks,
@@ -104,7 +122,7 @@ export function migrateStudyState(value: unknown): StudyState {
       recentReward: "小猫在等第一个学习奖励",
       nextUnlock: "等级 2 解锁铃铛小猫"
     })
-  };
+  });
 }
 
 export function loadStudyState(): StudyState {
