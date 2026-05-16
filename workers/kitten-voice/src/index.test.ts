@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, expect, it, vi } from "vitest";
 import { handleKittenVoiceRequest, KITTEN_TTS_INSTRUCTIONS, MAX_CHAT_MESSAGE_LENGTH, MAX_SPEECH_TEXT_LENGTH, MAX_TRANSCRIPT_TEXT_LENGTH } from "./index";
 
@@ -35,7 +36,7 @@ function transcriptionRequest(
   const contentType = options.contentType ?? "audio/webm";
   const filename = options.filename ?? "voice.webm";
   const content = options.content ?? "audio-bytes";
-  const body = [
+  const body = new TextEncoder().encode([
     `--${boundary}`,
     `Content-Disposition: form-data; name="audio"; filename="${filename}"`,
     `Content-Type: ${contentType}`,
@@ -43,12 +44,13 @@ function transcriptionRequest(
     content,
     `--${boundary}--`,
     ""
-  ].join("\r\n");
+  ].join("\r\n"));
 
   return new Request("https://voice.example.com/kitten-transcribe", {
     method: "POST",
     headers: {
       "Content-Type": `multipart/form-data; boundary=${boundary}`,
+      "Content-Length": String(body.byteLength),
       Origin: origin
     },
     body
